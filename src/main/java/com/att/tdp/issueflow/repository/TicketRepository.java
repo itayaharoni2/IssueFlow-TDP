@@ -15,4 +15,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findAllByProjectIdAndDeletedAtIsNotNull(Long projectId);
 
     Optional<Ticket> findByIdAndDeletedAtIsNull(Long id);
+
+    long countByProjectIdAndAssigneeIdAndStatusNotAndDeletedAtIsNull(Long projectId, Long assigneeId, com.att.tdp.issueflow.entity.enums.TicketStatus status);
+
+    List<Ticket> findByDueDateBeforeAndStatusNotAndDeletedAtIsNull(java.time.OffsetDateTime dueDate, com.att.tdp.issueflow.entity.enums.TicketStatus status);
 }

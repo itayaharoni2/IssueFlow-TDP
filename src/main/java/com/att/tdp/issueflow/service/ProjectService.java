@@ -24,6 +24,7 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final com.att.tdp.issueflow.repository.TicketRepository ticketRepository;
     private final AuditLogService auditLogService;
     private final AuthService authService;
 
@@ -108,6 +109,31 @@ public class ProjectService {
             projectRepository.save(project);
             auditLogService.log(AuditAction.RESTORE, "Project", project.getId(), getCurrentUserId(), "USER");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkloadResponse> getWorkload(Long projectId) {
+        projectRepository.findByIdAndDeletedAtIsNull(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        List<User> developers = userRepository.findAllByRole(com.att.tdp.issueflow.entity.enums.Role.DEVELOPER);
+        
+        return developers.stream()
+                .map(user -> {
+                    long count = ticketRepository.countByProjectIdAndAssigneeIdAndStatusNotAndDeletedAtIsNull(
+                            projectId, user.getId(), com.att.tdp.issueflow.entity.enums.TicketStatus.DONE);
+                    return new WorkloadResponse(user.getId(), user.getUsername(), count);
+                })
+                .sorted((w1, w2) -> {
+                    int cmp = Long.compare(w1.getOpenTicketCount(), w2.getOpenTicketCount());
+                    if (cmp == 0) {
+                        User u1 = userRepository.findById(w1.getUserId()).get();
+                        User u2 = userRepository.findById(w2.getUserId()).get();
+                        return u1.getCreatedAt().compareTo(u2.getCreatedAt());
+                    }
+                    return cmp;
+                })
+                .collect(Collectors.toList());
     }
 
     private Long getCurrentUserId() {

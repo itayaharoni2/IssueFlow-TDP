@@ -26,6 +26,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final com.att.tdp.issueflow.repository.TicketDependencyRepository ticketDependencyRepository;
     private final AuditLogService auditLogService;
     private final AuthService authService;
 
@@ -66,8 +67,22 @@ public class TicketService {
         if (request.getAssigneeId() != null) {
             assignee = userRepository.findById(request.getAssigneeId())
                     .orElseThrow(() -> new ResourceNotFoundException("Assignee not found"));
-        } 
-        // Note: Phase 4 auto-assignment logic would go here if assignee is null
+        } else {
+            // Auto-assignment logic
+            List<User> developers = userRepository.findAllByRole(com.att.tdp.issueflow.entity.enums.Role.DEVELOPER);
+            if (!developers.isEmpty()) {
+                assignee = developers.stream()
+                        .min((u1, u2) -> {
+                            long w1 = ticketRepository.countByProjectIdAndAssigneeIdAndStatusNotAndDeletedAtIsNull(project.getId(), u1.getId(), com.att.tdp.issueflow.entity.enums.TicketStatus.DONE);
+                            long w2 = ticketRepository.countByProjectIdAndAssigneeIdAndStatusNotAndDeletedAtIsNull(project.getId(), u2.getId(), com.att.tdp.issueflow.entity.enums.TicketStatus.DONE);
+                            if (w1 != w2) {
+                                return Long.compare(w1, w2);
+                            }
+                            return u1.getCreatedAt().compareTo(u2.getCreatedAt());
+                        })
+                        .orElse(null);
+            }
+        }
 
         Ticket ticket = new Ticket();
         ticket.setTitle(request.getTitle());
@@ -85,6 +100,10 @@ public class TicketService {
         Long currentUserId = getCurrentUserId();
         auditLogService.log(AuditAction.CREATE, "Ticket", saved.getId(), currentUserId, "USER");
 
+        if (request.getAssigneeId() == null && assignee != null) {
+            auditLogService.log(AuditAction.AUTO_ASSIGN, "Ticket", saved.getId(), null, "SYSTEM");
+        }
+
         return new TicketResponse(saved);
     }
 
@@ -93,9 +112,11 @@ public class TicketService {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
-        boolean updated = false;
+        if (com.att.tdp.issueflow.entity.enums.TicketStatus.DONE.equals(ticket.getStatus())) {
+            throw new com.att.tdp.issueflow.exception.BadRequestException("Cannot update a ticket that is already DONE.");
+        }
 
-        // Phase 4 lifecycle validation would go here
+        boolean updated = false;
 
         if (request.getTitle() != null) {
             ticket.setTitle(request.getTitle());
@@ -105,14 +126,14 @@ public class TicketService {
             ticket.setDescription(request.getDescription());
             updated = true;
         }
-        if (request.getStatus() != null) {
+        if (request.getStatus() != null && !request.getStatus().equals(ticket.getStatus())) {
+            validateStatusTransition(ticket.getStatus(), request.getStatus(), ticketId);
             ticket.setStatus(request.getStatus());
             updated = true;
         }
         if (request.getPriority() != null) {
             ticket.setPriority(request.getPriority());
-            // "Manual priority PATCH resets isOverdue to false"
-            ticket.setOverdue(false);
+            ticket.setOverdue(false); // Manual priority PATCH resets isOverdue to false
             updated = true;
         }
         if (request.getAssigneeId() != null) {
@@ -160,6 +181,26 @@ public class TicketService {
             return authService.getCurrentUser().getId();
         } catch (Exception e) {
             return null; // For test cases without auth
+        }
+    }
+
+    private void validateStatusTransition(com.att.tdp.issueflow.entity.enums.TicketStatus current, com.att.tdp.issueflow.entity.enums.TicketStatus next, Long ticketId) {
+        if (current == com.att.tdp.issueflow.entity.enums.TicketStatus.TODO && next != com.att.tdp.issueflow.entity.enums.TicketStatus.IN_PROGRESS) {
+            throw new com.att.tdp.issueflow.exception.BadRequestException("Invalid status transition from TODO. Next status must be IN_PROGRESS.");
+        }
+        if (current == com.att.tdp.issueflow.entity.enums.TicketStatus.IN_PROGRESS && next != com.att.tdp.issueflow.entity.enums.TicketStatus.IN_REVIEW) {
+            throw new com.att.tdp.issueflow.exception.BadRequestException("Invalid status transition from IN_PROGRESS. Next status must be IN_REVIEW.");
+        }
+        if (current == com.att.tdp.issueflow.entity.enums.TicketStatus.IN_REVIEW && next != com.att.tdp.issueflow.entity.enums.TicketStatus.DONE) {
+            throw new com.att.tdp.issueflow.exception.BadRequestException("Invalid status transition from IN_REVIEW. Next status must be DONE.");
+        }
+
+        if (next == com.att.tdp.issueflow.entity.enums.TicketStatus.DONE) {
+            boolean hasUnresolvedBlockers = ticketDependencyRepository.findAllByTicketId(ticketId).stream()
+                    .anyMatch(dep -> !com.att.tdp.issueflow.entity.enums.TicketStatus.DONE.equals(dep.getBlockedBy().getStatus()));
+            if (hasUnresolvedBlockers) {
+                throw new com.att.tdp.issueflow.exception.BadRequestException("Cannot transition to DONE: Ticket has unresolved blocking dependencies.");
+            }
         }
     }
 }

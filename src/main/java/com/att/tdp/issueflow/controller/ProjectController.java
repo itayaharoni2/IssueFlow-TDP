@@ -64,7 +64,6 @@ public class ProjectController {
     // For now we just create an empty stub so it compiles.
     @GetMapping("/{projectId}/workload")
     public ResponseEntity<List<WorkloadResponse>> getWorkload(@PathVariable Long projectId) {
-        // TODO: Implement workload using TicketRepository in phase 4/5 or when required
-        return ResponseEntity.ok(List.of());
+        return ResponseEntity.ok(projectService.getWorkload(projectId));
     }
 }
