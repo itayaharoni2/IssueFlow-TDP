@@ -21,7 +21,7 @@ spring:
         format_sql: true
   sql:
     init:
-      mode: always
+      mode: never
   servlet:
     multipart:
       max-file-size: 10MB

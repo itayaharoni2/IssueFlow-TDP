@@ -66,6 +66,18 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.CONFLICT, "Data integrity violation: " + rootCause(ex), null);
     }
 
+    // 401 — Unauthorized
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<Map<String, Object>> handleAuth(org.springframework.security.core.AuthenticationException ex) {
+        return error(HttpStatus.UNAUTHORIZED, ex.getMessage(), null);
+    }
+
+    // 403 — Forbidden
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        return error(HttpStatus.FORBIDDEN, ex.getMessage(), null);
+    }
+
     // 500 — catch-all
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleAll(Exception ex) {
