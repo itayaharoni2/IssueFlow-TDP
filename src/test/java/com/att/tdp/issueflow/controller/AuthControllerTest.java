@@ -1,5 +1,6 @@
 package com.att.tdp.issueflow.controller;
 
+import com.att.tdp.issueflow.config.JwtAuthFilter;
 import com.att.tdp.issueflow.dto.auth.LoginRequest;
 import com.att.tdp.issueflow.entity.User;
 import com.att.tdp.issueflow.entity.enums.Role;
@@ -38,9 +39,13 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private JwtAuthFilter jwtAuthFilter;
+
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
+        jwtAuthFilter.clearDenyList();
 
         // Seed a test user
         User user = new User();

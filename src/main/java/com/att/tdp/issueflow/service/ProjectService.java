@@ -1,0 +1,120 @@
+package com.att.tdp.issueflow.service;
+
+import com.att.tdp.issueflow.dto.project.CreateProjectRequest;
+import com.att.tdp.issueflow.dto.project.ProjectResponse;
+import com.att.tdp.issueflow.dto.project.UpdateProjectRequest;
+import com.att.tdp.issueflow.dto.project.WorkloadResponse;
+import com.att.tdp.issueflow.entity.Project;
+import com.att.tdp.issueflow.entity.User;
+import com.att.tdp.issueflow.entity.enums.AuditAction;
+import com.att.tdp.issueflow.exception.ResourceNotFoundException;
+import com.att.tdp.issueflow.repository.ProjectRepository;
+import com.att.tdp.issueflow.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class ProjectService {
+
+    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
+    private final AuthService authService;
+
+    @Transactional(readOnly = true)
+    public List<ProjectResponse> getActiveProjects() {
+        return projectRepository.findAllByDeletedAtIsNull().stream()
+                .map(ProjectResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectResponse> getDeletedProjects() {
+        return projectRepository.findAllByDeletedAtIsNotNull().stream()
+                .map(ProjectResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public ProjectResponse getProjectById(Long projectId) {
+        Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+        return new ProjectResponse(project);
+    }
+
+    @Transactional
+    public ProjectResponse createProject(CreateProjectRequest request) {
+        User owner = userRepository.findById(request.getOwnerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Owner user not found"));
+
+        Project project = new Project();
+        project.setName(request.getName());
+        project.setDescription(request.getDescription());
+        project.setOwner(owner);
+
+        Project saved = projectRepository.save(project);
+        
+        Long currentUserId = getCurrentUserId();
+        auditLogService.log(AuditAction.CREATE, "Project", saved.getId(), currentUserId, "USER");
+        
+        return new ProjectResponse(saved);
+    }
+
+    @Transactional
+    public void updateProject(Long projectId, UpdateProjectRequest request) {
+        Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        boolean updated = false;
+        if (request.getName() != null) {
+            project.setName(request.getName());
+            updated = true;
+        }
+        if (request.getDescription() != null) {
+            project.setDescription(request.getDescription());
+            updated = true;
+        }
+
+        if (updated) {
+            projectRepository.save(project);
+            auditLogService.log(AuditAction.UPDATE, "Project", project.getId(), getCurrentUserId(), "USER");
+        }
+    }
+
+    @Transactional
+    public void softDeleteProject(Long projectId) {
+        Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        project.setDeletedAt(LocalDateTime.now());
+        projectRepository.save(project);
+        
+        auditLogService.log(AuditAction.DELETE, "Project", project.getId(), getCurrentUserId(), "USER");
+    }
+
+    @Transactional
+    public void restoreProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        if (project.getDeletedAt() != null) {
+            project.setDeletedAt(null);
+            projectRepository.save(project);
+            auditLogService.log(AuditAction.RESTORE, "Project", project.getId(), getCurrentUserId(), "USER");
+        }
+    }
+
+    private Long getCurrentUserId() {
+        try {
+            return authService.getCurrentUser().getId();
+        } catch (Exception e) {
+            return null; // For test cases without auth
+        }
+    }
+}

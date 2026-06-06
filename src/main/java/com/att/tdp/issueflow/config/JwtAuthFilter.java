@@ -39,6 +39,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         tokenDenyList.add(token);
     }
 
+    public void clearDenyList() {
+        tokenDenyList.clear();
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
