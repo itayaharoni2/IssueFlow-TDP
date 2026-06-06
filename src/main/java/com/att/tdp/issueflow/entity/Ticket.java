@@ -8,8 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "tickets")
@@ -52,9 +52,9 @@ public class Ticket {
     @JoinColumn(name = "reporter_id", nullable = false)
     private User reporter;
 
-    /** Optional due date for auto-escalation scheduling */
+    /** Optional due date for auto-escalation scheduling (ISO-8601 with timezone, e.g. 2026-04-01T00:00:00Z) */
     @Column
-    private LocalDate dueDate;
+    private OffsetDateTime dueDate;
 
     /** True when ticket is at CRITICAL priority and still overdue */
     @Column(nullable = false)

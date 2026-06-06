@@ -37,9 +37,9 @@ public class AuditLog {
     @Column(nullable = false, length = 10)
     private String actor;
 
-    /** Username of the user who performed the action; null when actor=SYSTEM */
-    @Column(length = 100)
-    private String performedBy;
+    /** ID of the user who performed the action; null when actor=SYSTEM */
+    @Column
+    private Long performedByUserId;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
