@@ -16,12 +16,18 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+/**
+ * Role: Handles business logic and operations for escalation.
+ */
 public class EscalationService {
 
     private final TicketRepository ticketRepository;
     private final AuditLogService auditLogService;
 
     @Transactional
+    /**
+     * Executes the escalate overdue tickets operation.
+     */
     public void escalateOverdueTickets() {
         log.info("Running auto-escalation job...");
         List<Ticket> overdueTickets = ticketRepository.findByDueDateBeforeAndStatusNotAndDeletedAtIsNull(

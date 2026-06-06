@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
+/**
+ * Role: Handles database access and queries for ticket dependency.
+ */
 public interface TicketDependencyRepository extends JpaRepository<TicketDependency, Long> {
 
     List<TicketDependency> findAllByTicketId(Long ticketId);

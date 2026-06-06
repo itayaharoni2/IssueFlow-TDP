@@ -19,6 +19,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+/**
+ * Role: Represents the ticket dependency entity or object.
+ */
 public class TicketDependency {
 
     @Id

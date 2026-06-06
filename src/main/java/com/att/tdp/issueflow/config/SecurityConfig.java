@@ -22,12 +22,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity          // enables @PreAuthorize on controllers
 @RequiredArgsConstructor
+/**
+ * Role: Represents the security config entity or object.
+ */
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
     @Bean
+    /**
+     * Executes the filter chain operation.
+     */
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             // Disable CSRF — stateless REST API
@@ -70,11 +76,17 @@ public class SecurityConfig {
     }
 
     @Bean
+    /**
+     * Executes the password encoder operation.
+     */
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
+    /**
+     * Executes the authentication provider operation.
+     */
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
@@ -83,6 +95,9 @@ public class SecurityConfig {
     }
 
     @Bean
+    /**
+     * Executes the authentication manager operation.
+     */
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

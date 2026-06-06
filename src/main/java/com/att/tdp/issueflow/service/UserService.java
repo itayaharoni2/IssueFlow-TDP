@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Role: Handles business logic and operations for user.
+ */
 public class UserService {
 
     private final UserRepository userRepository;
@@ -25,6 +28,9 @@ public class UserService {
     private final AuthService authService;
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves all users.
+     */
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(UserResponse::new)
@@ -32,6 +38,9 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves user by id.
+     */
     public UserResponse getUserById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -39,6 +48,9 @@ public class UserService {
     }
 
     @Transactional
+    /**
+     * Creates a new user.
+     */
     public UserResponse createUser(CreateUserRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
@@ -64,6 +76,9 @@ public class UserService {
     }
 
     @Transactional
+    /**
+     * Updates an existing user.
+     */
     public void updateUser(Long userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -92,6 +107,9 @@ public class UserService {
     }
 
     @Transactional
+    /**
+     * Deletes user.
+     */
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));

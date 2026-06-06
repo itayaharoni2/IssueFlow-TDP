@@ -20,6 +20,9 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Role: Handles business logic and operations for project.
+ */
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
@@ -29,6 +32,9 @@ public class ProjectService {
     private final AuthService authService;
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves active projects.
+     */
     public List<ProjectResponse> getActiveProjects() {
         return projectRepository.findAllByDeletedAtIsNull().stream()
                 .map(ProjectResponse::new)
@@ -36,6 +42,9 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves deleted projects.
+     */
     public List<ProjectResponse> getDeletedProjects() {
         return projectRepository.findAllByDeletedAtIsNotNull().stream()
                 .map(ProjectResponse::new)
@@ -43,6 +52,9 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves project by id.
+     */
     public ProjectResponse getProjectById(Long projectId) {
         Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -50,6 +62,9 @@ public class ProjectService {
     }
 
     @Transactional
+    /**
+     * Creates a new project.
+     */
     public ProjectResponse createProject(CreateProjectRequest request) {
         User owner = userRepository.findById(request.getOwnerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Owner user not found"));
@@ -68,6 +83,9 @@ public class ProjectService {
     }
 
     @Transactional
+    /**
+     * Updates an existing project.
+     */
     public void updateProject(Long projectId, UpdateProjectRequest request) {
         Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -89,6 +107,9 @@ public class ProjectService {
     }
 
     @Transactional
+    /**
+     * Executes the soft delete project operation.
+     */
     public void softDeleteProject(Long projectId) {
         Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -100,6 +121,9 @@ public class ProjectService {
     }
 
     @Transactional
+    /**
+     * Executes the restore project operation.
+     */
     public void restoreProject(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -112,6 +136,9 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves workload.
+     */
     public List<WorkloadResponse> getWorkload(Long projectId) {
         projectRepository.findByIdAndDeletedAtIsNull(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -136,6 +163,9 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves current user id.
+     */
     private Long getCurrentUserId() {
         try {
             return authService.getCurrentUser().getId();

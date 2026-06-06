@@ -8,6 +8,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+/**
+ * Role: Data Transfer Object for login request.
+ */
 public class LoginRequest {
 
     @NotBlank(message = "username is required")

@@ -9,6 +9,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * Role: Data Transfer Object for import result response.
+ */
 public class ImportResultResponse {
     private int created;
     private int failed;

@@ -20,6 +20,9 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Role: Handles business logic and operations for attachment.
+ */
 public class AttachmentService {
 
     private final AttachmentRepository attachmentRepository;
@@ -33,6 +36,9 @@ public class AttachmentService {
     );
 
     @Transactional
+    /**
+     * Executes the upload attachment operation.
+     */
     public AttachmentResponse uploadAttachment(Long ticketId, MultipartFile file) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -67,6 +73,9 @@ public class AttachmentService {
     }
 
     @Transactional
+    /**
+     * Deletes attachment.
+     */
     public void deleteAttachment(Long ticketId, Long attachmentId) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -84,6 +93,9 @@ public class AttachmentService {
         auditLogService.log(AuditAction.DELETE, "Attachment", attachmentId, currentUserId, "USER");
     }
 
+    /**
+     * Retrieves current user id.
+     */
     private Long getCurrentUserId() {
         try {
             return authService.getCurrentUser().getId();
@@ -92,6 +104,9 @@ public class AttachmentService {
         }
     }
 
+    /**
+     * Retrieves current user entity.
+     */
     private User getCurrentUserEntity() {
         Long id = getCurrentUserId();
         if (id == null) {

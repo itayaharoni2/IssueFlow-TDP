@@ -18,11 +18,17 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+/**
+ * Role: Handles business logic and operations for user details impl.
+ */
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
 
     @Override
+    /**
+     * Executes the load user by username operation.
+     */
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(

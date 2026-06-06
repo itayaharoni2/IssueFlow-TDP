@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+/**
+ * Role: Handles database access and queries for user.
+ */
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);

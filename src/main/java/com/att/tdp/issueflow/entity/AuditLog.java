@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+/**
+ * Role: Represents the audit log entity or object.
+ */
 public class AuditLog {
 
     @Id

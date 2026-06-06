@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+/**
+ * Role: Represents the comment entity or object.
+ */
 public class Comment {
 
     @Id

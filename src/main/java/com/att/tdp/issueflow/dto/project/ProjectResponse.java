@@ -4,6 +4,9 @@ import com.att.tdp.issueflow.entity.Project;
 import lombok.Data;
 
 @Data
+/**
+ * Role: Data Transfer Object for project response.
+ */
 public class ProjectResponse {
     private Long id;
     private String name;

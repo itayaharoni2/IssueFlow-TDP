@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+/**
+ * Role: Represents the user entity or object.
+ */
 public class User {
 
     @Id

@@ -12,6 +12,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/audit-logs")
 @RequiredArgsConstructor
+/**
+ * Role: Provides REST API endpoints for audit log.
+ */
 public class AuditLogController {
 
     private final AuditLogService auditLogService;

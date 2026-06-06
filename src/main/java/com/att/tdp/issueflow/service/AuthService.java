@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Role: Handles business logic and operations for auth.
+ */
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
@@ -28,6 +31,9 @@ public class AuthService {
      * Authenticate username + password and return a signed JWT.
      * Spring Security's AuthenticationManager validates credentials and throws
      * BadCredentialsException on failure (mapped to 401 by Spring).
+     */
+    /**
+     * Executes the login operation.
      */
     public LoginResponse login(LoginRequest request) {
         // Delegates to DaoAuthenticationProvider → UserDetailsServiceImpl → DB
@@ -46,6 +52,9 @@ public class AuthService {
      * @param rawToken the raw JWT string extracted from the Authorization header
      *                 (without the "Bearer " prefix — the controller passes it trimmed)
      */
+    /**
+     * Executes the logout operation.
+     */
     public void logout(String rawToken) {
         jwtAuthFilter.blacklistToken(rawToken);
     }
@@ -53,6 +62,9 @@ public class AuthService {
     /**
      * Return the authenticated user's profile.
      * Reads the username from the SecurityContext (set by JwtAuthFilter).
+     */
+    /**
+     * Retrieves current user.
      */
     public UserResponse getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+/**
+ * Role: Provides REST API endpoints for auth.
+ */
 public class AuthController {
 
     private final AuthService authService;
@@ -23,6 +26,9 @@ public class AuthController {
      * Returns: { accessToken, tokenType, expiresIn }
      */
     @PostMapping("/login")
+    /**
+     * Executes the login operation.
+     */
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
@@ -34,6 +40,9 @@ public class AuthController {
      * Adds the token to the in-memory deny-list so it cannot be reused.
      */
     @PostMapping("/logout")
+    /**
+     * Executes the logout operation.
+     */
     public ResponseEntity<Void> logout(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
@@ -49,6 +58,9 @@ public class AuthController {
      * Returns the currently authenticated user's profile.
      */
     @GetMapping("/me")
+    /**
+     * Executes the me operation.
+     */
     public ResponseEntity<UserResponse> me() {
         return ResponseEntity.ok(authService.getCurrentUser());
     }

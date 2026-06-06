@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
+/**
+ * Role: Data Transfer Object for create project request.
+ */
 public class CreateProjectRequest {
 
     @NotBlank(message = "Name is required")

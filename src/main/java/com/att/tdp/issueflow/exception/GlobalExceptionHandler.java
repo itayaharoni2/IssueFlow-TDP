@@ -16,6 +16,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+/**
+ * Role: Custom exception for global exception handler.
+ */
 public class GlobalExceptionHandler {
 
     // 400 — @Valid failures
@@ -39,6 +42,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Map<String, Object>> handleBadRequest(BadRequestException ex) {
         return error(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
+    }
+
+    // 400 — illegal argument (duplicate username/email, etc.)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
+        return error(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
+    }
+
+    // 400 — malformed JSON or invalid enum value in request body
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleMessageNotReadable(
+            org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        return error(HttpStatus.BAD_REQUEST, "Malformed or unreadable request body: " + rootCause(ex), null);
     }
 
     // 404 — not found
@@ -96,6 +112,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 
+    /**
+     * Executes the root cause operation.
+     */
     private String rootCause(Throwable ex) {
         Throwable cause = ex;
         while (cause.getCause() != null) cause = cause.getCause();

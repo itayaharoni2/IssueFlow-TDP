@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
+/**
+ * Role: Handles database access and queries for comment.
+ */
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     List<Comment> findAllByTicketIdOrderByCreatedAtAsc(Long ticketId);

@@ -7,6 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
+/**
+ * Role: Data Transfer Object for create user request.
+ */
 public class CreateUserRequest {
 
     @NotBlank(message = "Username is required")

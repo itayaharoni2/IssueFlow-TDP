@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+/**
+ * Role: Represents the project entity or object.
+ */
 public class Project {
 
     @Id

@@ -34,6 +34,9 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Role: Handles business logic and operations for ticket.
+ */
 public class TicketService {
 
     private final TicketRepository ticketRepository;
@@ -44,6 +47,9 @@ public class TicketService {
     private final AuthService authService;
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves active tickets.
+     */
     public List<TicketResponse> getActiveTickets(Long projectId) {
         return ticketRepository.findAllByProjectIdAndDeletedAtIsNull(projectId).stream()
                 .map(TicketResponse::new)
@@ -51,6 +57,9 @@ public class TicketService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves deleted tickets.
+     */
     public List<TicketResponse> getDeletedTickets(Long projectId) {
         return ticketRepository.findAllByProjectIdAndDeletedAtIsNotNull(projectId).stream()
                 .map(TicketResponse::new)
@@ -58,6 +67,9 @@ public class TicketService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves ticket by id.
+     */
     public TicketResponse getTicketById(Long ticketId) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -65,6 +77,9 @@ public class TicketService {
     }
 
     @Transactional
+    /**
+     * Creates a new ticket.
+     */
     public TicketResponse createTicket(CreateTicketRequest request) {
         Project project = projectRepository.findByIdAndDeletedAtIsNull(request.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -121,6 +136,9 @@ public class TicketService {
     }
 
     @Transactional
+    /**
+     * Updates an existing ticket.
+     */
     public void updateTicket(Long ticketId, UpdateTicketRequest request) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -167,6 +185,9 @@ public class TicketService {
     }
 
     @Transactional
+    /**
+     * Executes the soft delete ticket operation.
+     */
     public void softDeleteTicket(Long ticketId) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -178,6 +199,9 @@ public class TicketService {
     }
 
     @Transactional
+    /**
+     * Executes the restore ticket operation.
+     */
     public void restoreTicket(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -189,9 +213,12 @@ public class TicketService {
         }
     }
 
+    /**
+     * Executes the export tickets to csv operation.
+     */
     public void exportTicketsToCsv(Long projectId, Writer writer) {
         List<Ticket> tickets = ticketRepository.findAllByProjectIdAndDeletedAtIsNull(projectId);
-        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("id", "title", "description", "status", "priority", "type", "assigneeId"))) {
+        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setHeader("id", "title", "description", "status", "priority", "type", "assigneeId").build())) {
             for (Ticket ticket : tickets) {
                 csvPrinter.printRecord(
                         ticket.getId(),
@@ -209,6 +236,9 @@ public class TicketService {
     }
 
     @Transactional
+    /**
+     * Executes the import tickets from csv operation.
+     */
     public ImportResultResponse importTicketsFromCsv(Long projectId, MultipartFile file) {
         Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -218,7 +248,7 @@ public class TicketService {
         List<String> errors = new ArrayList<>();
 
         try (Reader reader = new InputStreamReader(file.getInputStream());
-             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).setIgnoreHeaderCase(true).setTrim(true).build())) {
 
             for (CSVRecord csvRecord : csvParser) {
                 try {
@@ -260,6 +290,9 @@ public class TicketService {
         return new ImportResultResponse(created, failed, errors);
     }
 
+    /**
+     * Retrieves current user id.
+     */
     private Long getCurrentUserId() {
         try {
             return authService.getCurrentUser().getId();
@@ -268,6 +301,9 @@ public class TicketService {
         }
     }
 
+    /**
+     * Executes the validate status transition operation.
+     */
     private void validateStatusTransition(com.att.tdp.issueflow.entity.enums.TicketStatus current, com.att.tdp.issueflow.entity.enums.TicketStatus next, Long ticketId) {
         if (current == com.att.tdp.issueflow.entity.enums.TicketStatus.TODO && next != com.att.tdp.issueflow.entity.enums.TicketStatus.IN_PROGRESS) {
             throw new com.att.tdp.issueflow.exception.BadRequestException("Invalid status transition from TODO. Next status must be IN_PROGRESS.");

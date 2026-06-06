@@ -13,11 +13,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/tickets/{ticketId}/dependencies")
 @RequiredArgsConstructor
+/**
+ * Role: Provides REST API endpoints for dependency.
+ */
 public class DependencyController {
 
     private final DependencyService dependencyService;
 
     @PostMapping
+    /**
+     * Executes the add dependency operation.
+     */
     public ResponseEntity<Void> addDependency(@PathVariable Long ticketId,
                                               @Valid @RequestBody CreateDependencyRequest request) {
         dependencyService.addDependency(ticketId, request.getBlockedBy());
@@ -25,11 +31,17 @@ public class DependencyController {
     }
 
     @GetMapping
+    /**
+     * Retrieves dependencies.
+     */
     public ResponseEntity<List<DependencyResponse>> getDependencies(@PathVariable Long ticketId) {
         return ResponseEntity.ok(dependencyService.getDependencies(ticketId));
     }
 
     @DeleteMapping("/{blockerId}")
+    /**
+     * Executes the remove dependency operation.
+     */
     public ResponseEntity<Void> removeDependency(@PathVariable Long ticketId,
                                                  @PathVariable Long blockerId) {
         dependencyService.removeDependency(ticketId, blockerId);

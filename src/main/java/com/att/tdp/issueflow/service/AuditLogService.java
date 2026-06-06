@@ -10,11 +10,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Role: Handles business logic and operations for audit log.
+ */
 public class AuditLogService {
 
     private final AuditLogRepository auditLogRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    /**
+     * Logs an audit action to the database.
+     */
     public void log(AuditAction action, String entityType, Long entityId, Long performedByUserId, String actor) {
         AuditLog auditLog = new AuditLog();
         auditLog.setAction(action);

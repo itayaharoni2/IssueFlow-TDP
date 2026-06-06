@@ -7,6 +7,9 @@ import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Data
+/**
+ * Role: Data Transfer Object for update ticket request.
+ */
 public class UpdateTicketRequest {
     private String title;
     private String description;

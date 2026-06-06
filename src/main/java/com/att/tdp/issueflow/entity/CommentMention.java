@@ -18,6 +18,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+/**
+ * Role: Represents the comment mention entity or object.
+ */
 public class CommentMention {
 
     @Id

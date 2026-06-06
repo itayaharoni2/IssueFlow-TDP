@@ -19,12 +19,18 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Role: Handles business logic and operations for comment mention.
+ */
 public class CommentMentionService {
 
     private final CommentMentionRepository commentMentionRepository;
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves mentions.
+     */
     public MentionsResponse getMentions(Long userId, int page, int pageSize) {
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException("User not found");

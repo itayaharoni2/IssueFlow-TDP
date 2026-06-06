@@ -29,6 +29,9 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Role: Handles business logic and operations for comment.
+ */
 public class CommentService {
 
     private final CommentRepository commentRepository;
@@ -39,6 +42,9 @@ public class CommentService {
     private final AuthService authService;
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves comments by ticket.
+     */
     public List<CommentResponse> getCommentsByTicket(Long ticketId) {
         // Validation: Check if ticket exists
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
@@ -55,6 +61,9 @@ public class CommentService {
     }
 
     @Transactional
+    /**
+     * Creates a new comment.
+     */
     public CommentResponse createComment(Long ticketId, CreateCommentRequest request) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -78,6 +87,9 @@ public class CommentService {
     }
 
     @Transactional
+    /**
+     * Updates an existing comment.
+     */
     public void updateComment(Long ticketId, Long commentId, UpdateCommentRequest request) {
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -100,6 +112,9 @@ public class CommentService {
     }
 
     @Transactional
+    /**
+     * Deletes comment.
+     */
     public void deleteComment(Long ticketId, Long commentId) {
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -117,6 +132,9 @@ public class CommentService {
         auditLogService.log(AuditAction.DELETE, "Comment", commentId, getCurrentUserId(), "USER");
     }
 
+    /**
+     * Retrieves current user id.
+     */
     private Long getCurrentUserId() {
         try {
             return authService.getCurrentUser().getId();
@@ -125,6 +143,9 @@ public class CommentService {
         }
     }
 
+    /**
+     * Executes the process mentions operation.
+     */
     private List<MentionedUserDto> processMentions(Comment comment, String content) {
         commentMentionRepository.deleteByCommentId(comment.getId());
         

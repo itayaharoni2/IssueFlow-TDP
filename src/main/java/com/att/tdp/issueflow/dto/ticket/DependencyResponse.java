@@ -5,6 +5,9 @@ import com.att.tdp.issueflow.entity.enums.TicketStatus;
 import lombok.Data;
 
 @Data
+/**
+ * Role: Data Transfer Object for dependency response.
+ */
 public class DependencyResponse {
     private Long id;
     private String title;

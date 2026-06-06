@@ -12,6 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
+/**
+ * Role: Represents the jwt provider entity or object.
+ */
 public class JwtProvider {
 
     private final SecretKey key;
@@ -26,6 +29,9 @@ public class JwtProvider {
 
     /**
      * Generate a signed JWT with the username as the subject.
+     */
+    /**
+     * Generates a new JWT token for the user.
      */
     public String generateToken(String username) {
         Date now = new Date();
@@ -43,12 +49,18 @@ public class JwtProvider {
      * Return the username (subject) from a valid JWT.
      * Throws JwtException if the token is invalid or expired.
      */
+    /**
+     * Executes the extract username operation.
+     */
     public String extractUsername(String token) {
         return parseClaims(token).getSubject();
     }
 
     /**
      * Returns true if the token is signed correctly and not expired.
+     */
+    /**
+     * Executes the is token valid operation.
      */
     public boolean isTokenValid(String token) {
         try {
@@ -62,12 +74,18 @@ public class JwtProvider {
     /**
      * Returns expiration in seconds (for the login response expiresIn field).
      */
+    /**
+     * Retrieves expiration seconds.
+     */
     public long getExpirationSeconds() {
         return expirationMs / 1000;
     }
 
     // ─── private ────────────────────────────────────────────────────────────
 
+    /**
+     * Executes the parse claims operation.
+     */
     private Claims parseClaims(String token) {
         return Jwts.parser()
                 .verifyWith(key)

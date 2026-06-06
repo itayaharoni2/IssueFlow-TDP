@@ -21,6 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+/**
+ * Role: Represents the jwt auth filter entity or object.
+ */
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
@@ -35,15 +38,24 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     /**
      * Add a raw JWT string to the deny-list (called from AuthService on logout).
      */
+    /**
+     * Executes the blacklist token operation.
+     */
     public void blacklistToken(String token) {
         tokenDenyList.add(token);
     }
 
+    /**
+     * Executes the clear deny list operation.
+     */
     public void clearDenyList() {
         tokenDenyList.clear();
     }
 
     @Override
+    /**
+     * Filters HTTP requests to validate JWT tokens.
+     */
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
@@ -70,6 +82,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     // ─── private ────────────────────────────────────────────────────────────
 
+    /**
+     * Executes the extract token operation.
+     */
     private String extractToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {

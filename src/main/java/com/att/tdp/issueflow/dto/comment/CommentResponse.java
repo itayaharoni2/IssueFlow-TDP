@@ -6,6 +6,9 @@ import lombok.Data;
 import java.util.List;
 
 @Data
+/**
+ * Role: Data Transfer Object for comment response.
+ */
 public class CommentResponse {
     private Long id;
     private Long ticketId;

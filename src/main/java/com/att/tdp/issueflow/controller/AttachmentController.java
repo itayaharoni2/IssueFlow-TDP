@@ -10,6 +10,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/tickets/{ticketId}/attachments")
 @RequiredArgsConstructor
+/**
+ * Role: Provides REST API endpoints for attachment.
+ */
 public class AttachmentController {
 
     private final AttachmentService attachmentService;
@@ -22,6 +25,9 @@ public class AttachmentController {
     }
 
     @DeleteMapping("/{attachmentId}")
+    /**
+     * Deletes attachment.
+     */
     public ResponseEntity<Void> deleteAttachment(
             @PathVariable Long ticketId,
             @PathVariable Long attachmentId) {

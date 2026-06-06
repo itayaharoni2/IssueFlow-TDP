@@ -4,6 +4,9 @@ import com.att.tdp.issueflow.entity.Attachment;
 import lombok.Data;
 
 @Data
+/**
+ * Role: Data Transfer Object for attachment response.
+ */
 public class AttachmentResponse {
     private Long id;
     private Long ticketId;

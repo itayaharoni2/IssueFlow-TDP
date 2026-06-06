@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
+/**
+ * Role: Handles database access and queries for attachment.
+ */
 public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
     List<Attachment> findByTicketId(Long ticketId);
 }

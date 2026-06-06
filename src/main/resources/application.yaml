@@ -8,8 +8,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/issueflow
     username: issueflow
     password: issueflow
-    driverClassName: org.postgresql.Driver
-    platform: postgres
+    driver-class-name: org.postgresql.Driver
   jpa:
     database: POSTGRESQL
     show-sql: true
@@ -18,9 +17,10 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        format_sql: true
+        "[format_sql]": true
   sql:
     init:
+      platform: postgres
       mode: never
   servlet:
     multipart:
@@ -28,9 +28,9 @@ spring:
       max-request-size: 10MB
   jackson:
     serialization:
-      write-dates-as-timestamps: false
+      "[write-dates-as-timestamps]": false
     deserialization:
-      fail-on-unknown-properties: false
+      "[fail-on-unknown-properties]": false
 
 # JWT configuration (used in Phase 2)
 jwt:

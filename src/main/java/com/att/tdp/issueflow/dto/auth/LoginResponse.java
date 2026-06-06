@@ -5,6 +5,9 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+/**
+ * Role: Data Transfer Object for login response.
+ */
 public class LoginResponse {
 
     /** The signed JWT string. */

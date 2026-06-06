@@ -9,6 +9,9 @@ import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Data
+/**
+ * Role: Data Transfer Object for ticket response.
+ */
 public class TicketResponse {
     private Long id;
     private String title;

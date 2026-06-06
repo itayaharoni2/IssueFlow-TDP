@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+/**
+ * Role: Represents the attachment entity or object.
+ */
 public class Attachment {
 
     @Id

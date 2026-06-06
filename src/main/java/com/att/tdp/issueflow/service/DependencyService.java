@@ -16,12 +16,18 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Role: Handles business logic and operations for dependency.
+ */
 public class DependencyService {
 
     private final TicketDependencyRepository dependencyRepository;
     private final TicketRepository ticketRepository;
 
     @Transactional
+    /**
+     * Executes the add dependency operation.
+     */
     public void addDependency(Long ticketId, Long blockedById) {
         if (ticketId.equals(blockedById)) {
             throw new BadRequestException("A ticket cannot block itself.");
@@ -55,6 +61,9 @@ public class DependencyService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves dependencies.
+     */
     public List<DependencyResponse> getDependencies(Long ticketId) {
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -65,6 +74,9 @@ public class DependencyService {
     }
 
     @Transactional
+    /**
+     * Executes the remove dependency operation.
+     */
     public void removeDependency(Long ticketId, Long blockedById) {
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));

@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+/**
+ * Role: Handles database access and queries for project.
+ */
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     /** Active (non-deleted) projects */

@@ -1,20 +1,13 @@
 package com.att.tdp.issueflow.controller;
 
-import com.att.tdp.issueflow.config.JwtAuthFilter;
+import com.att.tdp.issueflow.BaseIntegrationTest;
 import com.att.tdp.issueflow.dto.auth.LoginRequest;
 import com.att.tdp.issueflow.entity.User;
 import com.att.tdp.issueflow.entity.enums.Role;
-import com.att.tdp.issueflow.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -22,31 +15,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class AuthControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private JwtAuthFilter jwtAuthFilter;
+class AuthControllerTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
-        jwtAuthFilter.clearDenyList();
-
+        // baseTeardown() in BaseIntegrationTest already cleaned everything.
         // Seed a test user
         User user = new User();
         user.setUsername("testuser");

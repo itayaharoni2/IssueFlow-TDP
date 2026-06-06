@@ -14,33 +14,51 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+/**
+ * Role: Provides REST API endpoints for user.
+ */
 public class UserController {
 
     private final UserService userService;
     private final com.att.tdp.issueflow.service.CommentMentionService commentMentionService;
 
     @GetMapping
+    /**
+     * Retrieves all users.
+     */
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/{userId}")
+    /**
+     * Retrieves user by id.
+     */
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long userId) {
         return ResponseEntity.ok(userService.getUserById(userId));
     }
 
     @PostMapping
+    /**
+     * Creates a new user.
+     */
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
         return ResponseEntity.ok(userService.createUser(request));
     }
 
     @PostMapping("/update/{userId}")
+    /**
+     * Updates an existing user.
+     */
     public ResponseEntity<Void> updateUser(@PathVariable Long userId, @RequestBody UpdateUserRequest request) {
         userService.updateUser(userId, request);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{userId}")
+    /**
+     * Deletes user.
+     */
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
         return ResponseEntity.ok().build();

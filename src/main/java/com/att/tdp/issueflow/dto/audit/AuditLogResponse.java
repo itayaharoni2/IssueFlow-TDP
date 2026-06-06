@@ -7,6 +7,9 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
+/**
+ * Role: Data Transfer Object for audit log response.
+ */
 public class AuditLogResponse {
     private Long id;
     private AuditAction action;

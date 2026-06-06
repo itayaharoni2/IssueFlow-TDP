@@ -10,6 +10,9 @@ import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Data
+/**
+ * Role: Data Transfer Object for create ticket request.
+ */
 public class CreateTicketRequest {
 
     @NotBlank(message = "Title is required")

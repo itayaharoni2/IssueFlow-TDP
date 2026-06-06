@@ -22,11 +22,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/tickets")
 @RequiredArgsConstructor
+/**
+ * Role: Provides REST API endpoints for ticket.
+ */
 public class TicketController {
 
     private final TicketService ticketService;
 
     @GetMapping
+    /**
+     * Retrieves tickets by project.
+     */
     public ResponseEntity<List<TicketResponse>> getTicketsByProject(@RequestParam Long projectId) {
         return ResponseEntity.ok(ticketService.getActiveTickets(projectId));
     }
@@ -34,12 +40,18 @@ public class TicketController {
     // Must be mapped before /{ticketId} to avoid collision
     @GetMapping("/deleted")
     @PreAuthorize("hasRole('ADMIN')")
+    /**
+     * Retrieves deleted tickets.
+     */
     public ResponseEntity<List<TicketResponse>> getDeletedTickets(@RequestParam Long projectId) {
         return ResponseEntity.ok(ticketService.getDeletedTickets(projectId));
     }
     
     // Export tickets to CSV
     @GetMapping("/export")
+    /**
+     * Executes the export tickets operation.
+     */
     public void exportTickets(@RequestParam Long projectId, HttpServletResponse response) throws IOException {
         response.setContentType("text/csv");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"tickets.csv\"");
@@ -55,22 +67,34 @@ public class TicketController {
     }
 
     @GetMapping("/{ticketId}")
+    /**
+     * Retrieves ticket by id.
+     */
     public ResponseEntity<TicketResponse> getTicketById(@PathVariable Long ticketId) {
         return ResponseEntity.ok(ticketService.getTicketById(ticketId));
     }
 
     @PostMapping
+    /**
+     * Creates a new ticket.
+     */
     public ResponseEntity<TicketResponse> createTicket(@Valid @RequestBody CreateTicketRequest request) {
         return ResponseEntity.ok(ticketService.createTicket(request));
     }
 
     @PatchMapping("/{ticketId}")
+    /**
+     * Updates an existing ticket.
+     */
     public ResponseEntity<Void> updateTicket(@PathVariable Long ticketId, @RequestBody UpdateTicketRequest request) {
         ticketService.updateTicket(ticketId, request);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{ticketId}")
+    /**
+     * Executes the soft delete ticket operation.
+     */
     public ResponseEntity<Void> softDeleteTicket(@PathVariable Long ticketId) {
         ticketService.softDeleteTicket(ticketId);
         return ResponseEntity.ok().build();
@@ -78,6 +102,9 @@ public class TicketController {
 
     @PostMapping("/{ticketId}/restore")
     @PreAuthorize("hasRole('ADMIN')")
+    /**
+     * Executes the restore ticket operation.
+     */
     public ResponseEntity<Void> restoreTicket(@PathVariable Long ticketId) {
         ticketService.restoreTicket(ticketId);
         return ResponseEntity.ok().build();

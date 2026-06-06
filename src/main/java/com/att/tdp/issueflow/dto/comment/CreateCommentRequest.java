@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
+/**
+ * Role: Data Transfer Object for create comment request.
+ */
 public class CreateCommentRequest {
 
     @NotNull(message = "AuthorId is required")

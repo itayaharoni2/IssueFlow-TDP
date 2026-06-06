@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+/**
+ * Role: Handles database access and queries for ticket.
+ */
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     List<Ticket> findAllByProjectIdAndDeletedAtIsNull(Long projectId);

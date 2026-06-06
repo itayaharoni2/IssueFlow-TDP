@@ -5,6 +5,9 @@ import com.att.tdp.issueflow.entity.enums.Role;
 import lombok.Getter;
 
 @Getter
+/**
+ * Role: Data Transfer Object for user response.
+ */
 public class UserResponse {
 
     private final Long id;

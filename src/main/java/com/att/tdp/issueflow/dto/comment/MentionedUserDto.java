@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * Role: Data Transfer Object for mentioned user dto.
+ */
 public class MentionedUserDto {
     private Long id;
     private String username;

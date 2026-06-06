@@ -16,6 +16,9 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+/**
+ * Role: Represents the ticket entity or object.
+ */
 public class Ticket {
 
     @Id
