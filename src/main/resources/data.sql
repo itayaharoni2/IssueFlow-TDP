@@ -1,3 +1,2 @@
-INSERT INTO task ( description, completed) VALUES
-                                               ( 'description1', 'completed'),
-                                               ('description2', 'completed');
+-- Seed data will be added in Phase 7.
+-- Example users and projects will be inserted here.

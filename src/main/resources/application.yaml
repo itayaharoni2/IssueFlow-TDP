@@ -13,8 +13,12 @@ spring:
   jpa:
     database: POSTGRESQL
     show-sql: true
+    open-in-view: false
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
   sql:
     init:
       mode: always
@@ -22,3 +26,8 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+
+# JWT configuration (used in Phase 2)
+jwt:
+  secret: "IssueFlowTDP2026SuperSecretKeyForJWTSigningMustBe256BitsLong!!"
+  expiration-ms: 86400000  # 24 hours

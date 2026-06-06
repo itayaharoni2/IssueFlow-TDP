@@ -1,3 +1,3 @@
-CREATE TABLE IF NOT EXISTS task (
-                                    description VARCHAR(64) NOT NULL,
-    completed   VARCHAR(30) NOT NULL);
+-- Schema is managed by Hibernate (ddl-auto: update).
+-- This file intentionally left empty.
+-- All tables are auto-created by JPA entity definitions.
