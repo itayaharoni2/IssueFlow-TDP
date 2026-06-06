@@ -3,7 +3,10 @@
 This document details the interaction with the AI assistant during the design and development of the IssueFlow backend.
 
 ## AI Model Used
-* **Model**: Gemini 3.5 Flash / Claude 3.5 Sonnet (via Antigravity IDE)
+* **Model**: 
+- Gemini 3.1 Pro for simple tasks
+- Claude 3.5 Sonnet / Opus for more complicated tasks like Architecture decisions and API Contract extraction
+- (via Antigravity IDE)
 
 ## AI Usage Summary
 The AI was used to:
@@ -20,10 +23,5 @@ The AI was used to:
 * **Prompt 5 (Plan)**: *"Create an implementation plan for this project in phases..."*
 * **Prompt 6 (Test Plan)**: *"Create a test plan for the IssueFlow assignment..."*
 * **Prompt 7 (Ambiguities)**: *"Review the assignment requirements and identify ambiguous or risky areas."*
-
-## Accountability Review Note
-As the developer, I have reviewed the generated code and verified that:
-* It conforms to all business rules (forward-only lifecycle, blocker checks, etc.).
-* Input validations are properly handled.
-* Core integration tests pass successfully.
-* I understand the implementation details of the authentication filters, optimistic locking, workload assignment, and file upload validators.
+* **Prompt 8 (Phase 6 — Tests)**: *"Implement Phase 6 — Tests: create test application.yaml, write auth, ticket, auto-assignment, auto-escalation, and attachment validation tests."*
+* **Prompt 9 (Phase 7 — Documentation)**: *"Implement Phase 7 — Documentation: finalize run.md with exact commands, prompts.md with all prompts used, and seed data.sql with example users."*
