@@ -12,7 +12,7 @@ public class AuditLogResponse {
     private AuditAction action;
     private String entityType;
     private Long entityId;
-    private Long performedByUserId;
+    private Long performedBy;
     private String actor;
     private LocalDateTime timestamp;
 
@@ -21,7 +21,7 @@ public class AuditLogResponse {
         this.action = auditLog.getAction();
         this.entityType = auditLog.getEntityType();
         this.entityId = auditLog.getEntityId();
-        this.performedByUserId = auditLog.getPerformedByUserId();
+        this.performedBy = auditLog.getPerformedByUserId();
         this.actor = auditLog.getActor();
         this.timestamp = auditLog.getTimestamp();
     }

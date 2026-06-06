@@ -17,6 +17,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final com.att.tdp.issueflow.service.CommentMentionService commentMentionService;
 
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAllUsers() {
@@ -44,6 +45,11 @@ public class UserController {
         userService.deleteUser(userId);
         return ResponseEntity.ok().build();
     }
-    
-    // Note: GET /users/{userId}/mentions is Phase 5
+    @GetMapping("/{userId}/mentions")
+    public ResponseEntity<com.att.tdp.issueflow.dto.user.MentionsResponse> getMentions(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        return ResponseEntity.ok(commentMentionService.getMentions(userId, page, pageSize));
+    }
 }

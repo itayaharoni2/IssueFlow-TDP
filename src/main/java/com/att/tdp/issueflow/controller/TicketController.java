@@ -1,15 +1,22 @@
 package com.att.tdp.issueflow.controller;
 
 import com.att.tdp.issueflow.dto.ticket.CreateTicketRequest;
+import com.att.tdp.issueflow.dto.ticket.ImportResultResponse;
 import com.att.tdp.issueflow.dto.ticket.TicketResponse;
 import com.att.tdp.issueflow.dto.ticket.UpdateTicketRequest;
 import com.att.tdp.issueflow.service.TicketService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -31,16 +38,20 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.getDeletedTickets(projectId));
     }
     
-    // Stub for Phase 5 export (must be mapped before /{ticketId})
+    // Export tickets to CSV
     @GetMapping("/export")
-    public ResponseEntity<Void> exportTickets(@RequestParam Long projectId) {
-        return ResponseEntity.ok().build();
+    public void exportTickets(@RequestParam Long projectId, HttpServletResponse response) throws IOException {
+        response.setContentType("text/csv");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"tickets.csv\"");
+        ticketService.exportTicketsToCsv(projectId, response.getWriter());
     }
     
-    // Stub for Phase 5 import (must be mapped before /{ticketId})
+    // Import tickets from CSV
     @PostMapping("/import")
-    public ResponseEntity<Void> importTickets() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ImportResultResponse> importTickets(
+            @RequestParam("projectId") Long projectId,
+            @RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(ticketService.importTicketsFromCsv(projectId, file));
     }
 
     @GetMapping("/{ticketId}")

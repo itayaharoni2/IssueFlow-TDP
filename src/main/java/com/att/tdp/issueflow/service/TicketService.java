@@ -14,8 +14,21 @@ import com.att.tdp.issueflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import com.att.tdp.issueflow.dto.ticket.ImportResultResponse;
+import com.att.tdp.issueflow.entity.enums.TicketStatus;
+import com.att.tdp.issueflow.entity.enums.TicketPriority;
+import com.att.tdp.issueflow.entity.enums.TicketType;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Writer;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -174,6 +187,77 @@ public class TicketService {
             ticketRepository.save(ticket);
             auditLogService.log(AuditAction.RESTORE, "Ticket", ticket.getId(), getCurrentUserId(), "USER");
         }
+    }
+
+    public void exportTicketsToCsv(Long projectId, Writer writer) {
+        List<Ticket> tickets = ticketRepository.findAllByProjectIdAndDeletedAtIsNull(projectId);
+        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("id", "title", "description", "status", "priority", "type", "assigneeId"))) {
+            for (Ticket ticket : tickets) {
+                csvPrinter.printRecord(
+                        ticket.getId(),
+                        ticket.getTitle(),
+                        ticket.getDescription(),
+                        ticket.getStatus(),
+                        ticket.getPriority(),
+                        ticket.getType(),
+                        ticket.getAssignee() != null ? ticket.getAssignee().getId() : null
+                );
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to write CSV data", e);
+        }
+    }
+
+    @Transactional
+    public ImportResultResponse importTicketsFromCsv(Long projectId, MultipartFile file) {
+        Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        int created = 0;
+        int failed = 0;
+        List<String> errors = new ArrayList<>();
+
+        try (Reader reader = new InputStreamReader(file.getInputStream());
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
+
+            for (CSVRecord csvRecord : csvParser) {
+                try {
+                    Ticket ticket = new Ticket();
+                    ticket.setProject(project);
+                    ticket.setTitle(csvRecord.get("title"));
+                    ticket.setDescription(csvRecord.get("description"));
+                    ticket.setStatus(TicketStatus.valueOf(csvRecord.get("status").toUpperCase()));
+                    ticket.setPriority(TicketPriority.valueOf(csvRecord.get("priority").toUpperCase()));
+                    ticket.setType(TicketType.valueOf(csvRecord.get("type").toUpperCase()));
+
+                    String assigneeIdStr = csvRecord.isSet("assigneeId") ? csvRecord.get("assigneeId") : null;
+                    if (assigneeIdStr != null && !assigneeIdStr.isEmpty()) {
+                        Long assigneeId = Long.parseLong(assigneeIdStr);
+                        User assignee = userRepository.findById(assigneeId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Assignee not found for ID: " + assigneeId));
+                        ticket.setAssignee(assignee);
+                    }
+
+                    // For reporter, if not provided, we can set current user or null. Rules say "assigneeId", no reporter specified for CSV.
+                    User reporter = null;
+                    try {
+                        reporter = userRepository.findById(authService.getCurrentUser().getId()).orElse(null);
+                    } catch (Exception ignored) {}
+                    ticket.setReporter(reporter);
+
+                    Ticket saved = ticketRepository.save(ticket);
+                    auditLogService.log(AuditAction.CREATE, "Ticket", saved.getId(), getCurrentUserId(), "USER");
+                    created++;
+                } catch (Exception e) {
+                    failed++;
+                    errors.add("Row " + csvRecord.getRecordNumber() + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse CSV file", e);
+        }
+
+        return new ImportResultResponse(created, failed, errors);
     }
 
     private Long getCurrentUserId() {

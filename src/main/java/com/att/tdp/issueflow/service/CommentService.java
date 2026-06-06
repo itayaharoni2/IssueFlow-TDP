@@ -8,15 +8,23 @@ import com.att.tdp.issueflow.entity.Ticket;
 import com.att.tdp.issueflow.entity.User;
 import com.att.tdp.issueflow.entity.enums.AuditAction;
 import com.att.tdp.issueflow.exception.ResourceNotFoundException;
+import com.att.tdp.issueflow.repository.CommentMentionRepository;
 import com.att.tdp.issueflow.repository.CommentRepository;
 import com.att.tdp.issueflow.repository.TicketRepository;
 import com.att.tdp.issueflow.repository.UserRepository;
+import com.att.tdp.issueflow.entity.CommentMention;
+import com.att.tdp.issueflow.dto.comment.MentionedUserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +32,7 @@ import java.util.stream.Collectors;
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final CommentMentionRepository commentMentionRepository;
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
@@ -36,7 +45,12 @@ public class CommentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
         return commentRepository.findAllByTicketIdOrderByCreatedAtAsc(ticketId).stream()
-                .map(comment -> new CommentResponse(comment, List.of())) // Mentions are Phase 5
+                .map(comment -> {
+                    List<MentionedUserDto> mentions = commentMentionRepository.findByCommentId(comment.getId()).stream()
+                            .map(cm -> new MentionedUserDto(cm.getUser().getId(), cm.getUser().getUsername(), cm.getUser().getFullName()))
+                            .collect(Collectors.toList());
+                    return new CommentResponse(comment, mentions);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -55,12 +69,12 @@ public class CommentService {
 
         Comment saved = commentRepository.save(comment);
 
-        // Phase 5: Mention parsing will happen here
+        List<MentionedUserDto> mentionedUsers = processMentions(saved, request.getContent());
 
         Long currentUserId = getCurrentUserId();
         auditLogService.log(AuditAction.CREATE, "Comment", saved.getId(), currentUserId, "USER");
 
-        return new CommentResponse(saved, List.of());
+        return new CommentResponse(saved, mentionedUsers);
     }
 
     @Transactional
@@ -80,7 +94,7 @@ public class CommentService {
         
         commentRepository.save(comment);
 
-        // Phase 5: Mentions re-parsing will happen here
+        processMentions(comment, request.getContent());
 
         auditLogService.log(AuditAction.UPDATE, "Comment", comment.getId(), getCurrentUserId(), "USER");
     }
@@ -97,6 +111,7 @@ public class CommentService {
             throw new IllegalArgumentException("Comment does not belong to this ticket");
         }
 
+        commentMentionRepository.deleteByCommentId(commentId);
         commentRepository.delete(comment);
 
         auditLogService.log(AuditAction.DELETE, "Comment", commentId, getCurrentUserId(), "USER");
@@ -108,5 +123,32 @@ public class CommentService {
         } catch (Exception e) {
             return null; // For test cases without auth
         }
+    }
+
+    private List<MentionedUserDto> processMentions(Comment comment, String content) {
+        commentMentionRepository.deleteByCommentId(comment.getId());
+        
+        List<MentionedUserDto> mentionedUsers = new ArrayList<>();
+        if (content == null || content.isEmpty()) {
+            return mentionedUsers;
+        }
+
+        Set<String> usernames = new HashSet<>();
+        Pattern pattern = Pattern.compile("(?<=^|\\s)@([a-zA-Z0-9_]+)");
+        Matcher matcher = pattern.matcher(content);
+        while (matcher.find()) {
+            usernames.add(matcher.group(1).toLowerCase());
+        }
+
+        for (String username : usernames) {
+            userRepository.findByUsernameIgnoreCase(username).ifPresent(user -> {
+                CommentMention mention = new CommentMention();
+                mention.setComment(comment);
+                mention.setUser(user);
+                commentMentionRepository.save(mention);
+                mentionedUsers.add(new MentionedUserDto(user.getId(), user.getUsername(), user.getFullName()));
+            });
+        }
+        return mentionedUsers;
     }
 }
