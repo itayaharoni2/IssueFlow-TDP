@@ -20,7 +20,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 /**
- * Role: Represents the ticket dependency entity or object.
+ * Role: Represents a dependency link between two tickets in the same project.
+ * It defines a "blocked by" relationship to enforce workflows, ensuring tickets are completed in the correct order.
  */
 public class TicketDependency {
 

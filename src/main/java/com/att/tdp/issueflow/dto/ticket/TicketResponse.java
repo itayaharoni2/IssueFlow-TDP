@@ -10,7 +10,8 @@ import java.time.OffsetDateTime;
 
 @Data
 /**
- * Role: Data Transfer Object for ticket response.
+ * Role: Data Transfer Object representing a ticket returned to the client.
+ * It encapsulates comprehensive ticket details including status, priority, type, project ID, assignee, and due date information.
  */
 public class TicketResponse {
     private Long id;
@@ -24,6 +25,9 @@ public class TicketResponse {
     private OffsetDateTime dueDate;
     private boolean isOverdue;
 
+    /**
+     * Constructs a TicketResponse object from a given Ticket entity, computing dynamic fields like isOverdue.
+     */
     public TicketResponse(Ticket ticket) {
         this.id = ticket.getId();
         this.title = ticket.getTitle();

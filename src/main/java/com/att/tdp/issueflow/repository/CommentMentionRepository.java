@@ -10,10 +10,22 @@ import java.util.List;
 
 @Repository
 /**
- * Role: Handles database access and queries for comment mention.
+ * Role: Data Access Object for CommentMention entities.
+ * It manages the many-to-many relationship between comments and mentioned users, supporting pagination and bulk deletion.
  */
 public interface CommentMentionRepository extends JpaRepository<CommentMention, Long> {
+    /**
+     * Deletes all mentions associated with a given comment, useful during comment updates or deletions.
+     */
     void deleteByCommentId(Long commentId);
+
+    /**
+     * Retrieves a paginated list of mentions for a specific user to power their notifications feed.
+     */
     Page<CommentMention> findByUserId(Long userId, Pageable pageable);
+
+    /**
+     * Retrieves all user mentions associated with a specific comment.
+     */
     List<CommentMention> findByCommentId(Long commentId);
 }

@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 /**
- * Role: Provides REST API endpoints for auth.
+ * Role: Provides REST API endpoints for authentication and user sessions.
+ * It handles login requests to issue JWTs, logout requests to invalidate them, and fetching the current authenticated user's profile.
  */
 public class AuthController {
 
@@ -27,7 +28,7 @@ public class AuthController {
      */
     @PostMapping("/login")
     /**
-     * Executes the login operation.
+     * Authenticates user credentials and returns a signed JWT token upon success.
      */
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
@@ -41,7 +42,7 @@ public class AuthController {
      */
     @PostMapping("/logout")
     /**
-     * Executes the logout operation.
+     * Invalidates the current user's session by adding their JWT token to the deny-list.
      */
     public ResponseEntity<Void> logout(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
@@ -59,7 +60,7 @@ public class AuthController {
      */
     @GetMapping("/me")
     /**
-     * Executes the me operation.
+     * Retrieves the profile information of the currently authenticated user.
      */
     public ResponseEntity<UserResponse> me() {
         return ResponseEntity.ok(authService.getCurrentUser());

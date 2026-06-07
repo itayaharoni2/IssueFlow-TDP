@@ -8,8 +8,12 @@ import java.util.List;
 
 @Repository
 /**
- * Role: Handles database access and queries for attachment.
+ * Role: Data Access Object for Attachment entities.
+ * It provides standard CRUD operations and custom query methods to retrieve attachments by their associated ticket ID.
  */
 public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
+    /**
+     * Retrieves all attachments associated with a specific ticket.
+     */
     List<Attachment> findByTicketId(Long ticketId);
 }

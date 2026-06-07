@@ -17,7 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 /**
- * Role: Handles business logic and operations for escalation.
+ * Role: Service layer responsible for executing automated workflows on tickets.
+ * It identifies overdue tickets and proactively increases their priority according to predefined escalation paths.
  */
 public class EscalationService {
 
@@ -26,7 +27,7 @@ public class EscalationService {
 
     @Transactional
     /**
-     * Executes the escalate overdue tickets operation.
+     * Scans for incomplete tickets past their due date and bumps their priority upward, logging each automated action.
      */
     public void escalateOverdueTickets() {
         log.info("Running auto-escalation job...");

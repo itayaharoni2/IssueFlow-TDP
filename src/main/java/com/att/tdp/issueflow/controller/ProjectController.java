@@ -17,7 +17,8 @@ import java.util.List;
 @RequestMapping("/projects")
 @RequiredArgsConstructor
 /**
- * Role: Provides REST API endpoints for project.
+ * Role: Provides REST API endpoints for managing projects.
+ * It exposes operations for creating, updating, retrieving, and deleting projects, along with querying project workloads.
  */
 public class ProjectController {
 
@@ -25,7 +26,7 @@ public class ProjectController {
 
     @GetMapping
     /**
-     * Retrieves all active projects.
+     * Retrieves a list of all active (non-deleted) projects.
      */
     public ResponseEntity<List<ProjectResponse>> getAllActiveProjects() {
         return ResponseEntity.ok(projectService.getActiveProjects());
@@ -34,7 +35,7 @@ public class ProjectController {
     @GetMapping("/deleted")
     @PreAuthorize("hasRole('ADMIN')")
     /**
-     * Retrieves deleted projects.
+     * Retrieves a list of projects that have been soft-deleted. Requires ADMIN privileges.
      */
     public ResponseEntity<List<ProjectResponse>> getDeletedProjects() {
         return ResponseEntity.ok(projectService.getDeletedProjects());
@@ -42,7 +43,7 @@ public class ProjectController {
 
     @GetMapping("/{projectId}")
     /**
-     * Retrieves project by id.
+     * Retrieves the details of a specific project by its ID.
      */
     public ResponseEntity<ProjectResponse> getProjectById(@PathVariable Long projectId) {
         return ResponseEntity.ok(projectService.getProjectById(projectId));
@@ -50,7 +51,7 @@ public class ProjectController {
 
     @PostMapping
     /**
-     * Creates a new project.
+     * Creates a new project with the provided details.
      */
     public ResponseEntity<ProjectResponse> createProject(@Valid @RequestBody CreateProjectRequest request) {
         return ResponseEntity.ok(projectService.createProject(request));
@@ -58,7 +59,7 @@ public class ProjectController {
 
     @PatchMapping("/{projectId}")
     /**
-     * Updates an existing project.
+     * Updates the details of an existing project.
      */
     public ResponseEntity<Void> updateProject(@PathVariable Long projectId, @RequestBody UpdateProjectRequest request) {
         projectService.updateProject(projectId, request);
@@ -67,7 +68,7 @@ public class ProjectController {
 
     @DeleteMapping("/{projectId}")
     /**
-     * Executes the soft delete project operation.
+     * Soft deletes a specific project, marking it as inactive without permanently removing its data.
      */
     public ResponseEntity<Void> softDeleteProject(@PathVariable Long projectId) {
         projectService.softDeleteProject(projectId);
@@ -77,7 +78,7 @@ public class ProjectController {
     @PostMapping("/{projectId}/restore")
     @PreAuthorize("hasRole('ADMIN')")
     /**
-     * Executes the restore project operation.
+     * Restores a soft-deleted project back to active status. Requires ADMIN privileges.
      */
     public ResponseEntity<Void> restoreProject(@PathVariable Long projectId) {
         projectService.restoreProject(projectId);
@@ -88,7 +89,7 @@ public class ProjectController {
     // For now we just create an empty stub so it compiles.
     @GetMapping("/{projectId}/workload")
     /**
-     * Retrieves workload.
+     * Retrieves the current workload statistics for a specific project.
      */
     public ResponseEntity<List<WorkloadResponse>> getWorkload(@PathVariable Long projectId) {
         return ResponseEntity.ok(projectService.getWorkload(projectId));

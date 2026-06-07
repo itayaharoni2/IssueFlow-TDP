@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 /**
- * Role: Represents the user entity or object.
+ * Role: Represents an authenticated user of the system.
+ * It stores identity details, hashed passwords, and roles, forming the basis for authentication, authorization, and ownership across the app.
  */
 public class User {
 

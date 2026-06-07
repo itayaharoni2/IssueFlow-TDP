@@ -5,7 +5,8 @@ import lombok.Data;
 
 @Data
 /**
- * Role: Data Transfer Object for update comment request.
+ * Role: Data Transfer Object representing the payload to update an existing comment.
+ * It ensures the client provides valid, non-blank content when making modifications.
  */
 public class UpdateCommentRequest {
 

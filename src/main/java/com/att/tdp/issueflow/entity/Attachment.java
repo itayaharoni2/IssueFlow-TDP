@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 /**
- * Role: Represents the attachment entity or object.
+ * Role: Represents a file attachment linked to a specific ticket.
+ * It stores file metadata along with the actual binary content mapped to a database Lob, tracking who uploaded it and when.
  */
 public class Attachment {
 

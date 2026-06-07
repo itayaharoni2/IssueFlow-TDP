@@ -5,7 +5,8 @@ import lombok.Data;
 
 @Data
 /**
- * Role: Data Transfer Object for update user request.
+ * Role: Data Transfer Object representing the payload to update an existing user's profile.
+ * It provides optional fields such as full name and role that a client might want to modify.
  */
 public class UpdateUserRequest {
     private String fullName;

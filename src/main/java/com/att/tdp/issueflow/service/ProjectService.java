@@ -21,7 +21,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 /**
- * Role: Handles business logic and operations for project.
+ * Role: Service layer managing top-level projects within the system.
+ * It handles standard CRUD operations along with soft-delete mechanics and calculating developer workloads per project.
  */
 public class ProjectService {
 
@@ -33,7 +34,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     /**
-     * Retrieves active projects.
+     * Fetches a list of all current projects that have not been soft-deleted.
      */
     public List<ProjectResponse> getActiveProjects() {
         return projectRepository.findAllByDeletedAtIsNull().stream()
@@ -43,7 +44,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     /**
-     * Retrieves deleted projects.
+     * Fetches a list of all projects that have been soft-deleted (archived).
      */
     public List<ProjectResponse> getDeletedProjects() {
         return projectRepository.findAllByDeletedAtIsNotNull().stream()
@@ -53,7 +54,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     /**
-     * Retrieves project by id.
+     * Retrieves the specific details of an active project by its unique identifier.
      */
     public ProjectResponse getProjectById(Long projectId) {
         Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
@@ -63,7 +64,7 @@ public class ProjectService {
 
     @Transactional
     /**
-     * Creates a new project.
+     * Validates input and provisions a new project, establishing the owner and generating a creation audit log.
      */
     public ProjectResponse createProject(CreateProjectRequest request) {
         User owner = userRepository.findById(request.getOwnerId())
@@ -84,7 +85,7 @@ public class ProjectService {
 
     @Transactional
     /**
-     * Updates an existing project.
+     * Applies partial updates to a project's details, persisting only fields that were actually modified.
      */
     public void updateProject(Long projectId, UpdateProjectRequest request) {
         Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
@@ -108,7 +109,7 @@ public class ProjectService {
 
     @Transactional
     /**
-     * Executes the soft delete project operation.
+     * Soft-deletes a project by stamping a deletion timestamp, hiding it from active views without destroying data.
      */
     public void softDeleteProject(Long projectId) {
         Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
@@ -122,7 +123,7 @@ public class ProjectService {
 
     @Transactional
     /**
-     * Executes the restore project operation.
+     * Restores a soft-deleted project by clearing its deletion timestamp, making it active again.
      */
     public void restoreProject(Long projectId) {
         Project project = projectRepository.findById(projectId)
@@ -137,7 +138,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     /**
-     * Retrieves workload.
+     * Calculates the active ticket load for all developers on a given project, sorted from least to most busy.
      */
     public List<WorkloadResponse> getWorkload(Long projectId) {
         projectRepository.findByIdAndDeletedAtIsNull(projectId)
@@ -164,7 +165,7 @@ public class ProjectService {
     }
 
     /**
-     * Retrieves current user id.
+     * Helper method to extract the ID of the currently authenticated user from the security context.
      */
     private Long getCurrentUserId() {
         try {

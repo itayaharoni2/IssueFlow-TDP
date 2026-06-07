@@ -5,7 +5,8 @@ package com.att.tdp.issueflow.entity.enums;
  * TODO(0) → IN_PROGRESS(1) → IN_REVIEW(2) → DONE(3)
  */
 /**
- * Role: Represents the ticket status entity or object.
+ * Role: Enum representing the current state of a ticket in its lifecycle.
+ * It is ordered from TODO to DONE to support sequential, forward-only progression logic based on ordinal values.
  */
 public enum TicketStatus {
     TODO,

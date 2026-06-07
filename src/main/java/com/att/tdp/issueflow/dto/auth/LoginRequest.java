@@ -9,7 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 /**
- * Role: Data Transfer Object for login request.
+ * Role: Data Transfer Object representing the client payload for a login request.
+ * It contains the user's provided credentials (username and password) which are validated for authentication.
  */
 public class LoginRequest {
 

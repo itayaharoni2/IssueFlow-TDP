@@ -35,7 +35,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 /**
- * Role: Handles business logic and operations for ticket.
+ * Role: Service layer managing the core entity of the system: Tickets.
+ * It provides operations for standard CRUD, status transitions, workload-based auto-assignment, and CSV import/export.
  */
 public class TicketService {
 
@@ -48,7 +49,7 @@ public class TicketService {
 
     @Transactional(readOnly = true)
     /**
-     * Retrieves active tickets.
+     * Retrieves all active (non-deleted) tickets for a specific project.
      */
     public List<TicketResponse> getActiveTickets(Long projectId) {
         return ticketRepository.findAllByProjectIdAndDeletedAtIsNull(projectId).stream()
@@ -58,7 +59,7 @@ public class TicketService {
 
     @Transactional(readOnly = true)
     /**
-     * Retrieves deleted tickets.
+     * Retrieves all soft-deleted tickets for a specific project.
      */
     public List<TicketResponse> getDeletedTickets(Long projectId) {
         return ticketRepository.findAllByProjectIdAndDeletedAtIsNotNull(projectId).stream()
@@ -68,7 +69,7 @@ public class TicketService {
 
     @Transactional(readOnly = true)
     /**
-     * Retrieves ticket by id.
+     * Retrieves a specific ticket by its ID, ensuring it has not been soft-deleted.
      */
     public TicketResponse getTicketById(Long ticketId) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
@@ -78,7 +79,7 @@ public class TicketService {
 
     @Transactional
     /**
-     * Creates a new ticket.
+     * Creates a new ticket, optionally auto-assigning it based on current developer workloads, and records an audit log.
      */
     public TicketResponse createTicket(CreateTicketRequest request) {
         Project project = projectRepository.findByIdAndDeletedAtIsNull(request.getProjectId())
@@ -137,7 +138,7 @@ public class TicketService {
 
     @Transactional
     /**
-     * Updates an existing ticket.
+     * Updates an existing ticket, validating allowed status transitions and dependencies before saving changes.
      */
     public void updateTicket(Long ticketId, UpdateTicketRequest request) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
@@ -186,7 +187,7 @@ public class TicketService {
 
     @Transactional
     /**
-     * Executes the soft delete ticket operation.
+     * Soft-deletes a ticket by stamping a deletion timestamp, hiding it from active views.
      */
     public void softDeleteTicket(Long ticketId) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
@@ -200,7 +201,7 @@ public class TicketService {
 
     @Transactional
     /**
-     * Executes the restore ticket operation.
+     * Restores a soft-deleted ticket by clearing its deletion timestamp.
      */
     public void restoreTicket(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
@@ -214,7 +215,7 @@ public class TicketService {
     }
 
     /**
-     * Executes the export tickets to csv operation.
+     * Exports all active tickets in a project to a CSV format and writes them to the provided Writer.
      */
     public void exportTicketsToCsv(Long projectId, Writer writer) {
         List<Ticket> tickets = ticketRepository.findAllByProjectIdAndDeletedAtIsNull(projectId);
@@ -237,7 +238,7 @@ public class TicketService {
 
     @Transactional
     /**
-     * Executes the import tickets from csv operation.
+     * Imports multiple tickets from a provided CSV file, returning a summary of successful and failed row imports.
      */
     public ImportResultResponse importTicketsFromCsv(Long projectId, MultipartFile file) {
         Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
@@ -291,7 +292,7 @@ public class TicketService {
     }
 
     /**
-     * Retrieves current user id.
+     * Helper method to extract the ID of the currently authenticated user from the security context.
      */
     private Long getCurrentUserId() {
         try {
@@ -302,7 +303,7 @@ public class TicketService {
     }
 
     /**
-     * Executes the validate status transition operation.
+     * Enforces the forward-only ticket lifecycle and prevents transitioning to DONE if blocking dependencies remain unresolved.
      */
     private void validateStatusTransition(com.att.tdp.issueflow.entity.enums.TicketStatus current, com.att.tdp.issueflow.entity.enums.TicketStatus next, Long ticketId) {
         if (current == com.att.tdp.issueflow.entity.enums.TicketStatus.TODO && next != com.att.tdp.issueflow.entity.enums.TicketStatus.IN_PROGRESS) {

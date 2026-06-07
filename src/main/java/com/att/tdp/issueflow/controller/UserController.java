@@ -15,7 +15,8 @@ import java.util.List;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 /**
- * Role: Provides REST API endpoints for user.
+ * Role: Provides REST API endpoints for managing system users.
+ * It allows administrators to create, update, delete, and query user profiles, as well as fetch user mentions.
  */
 public class UserController {
 
@@ -24,7 +25,7 @@ public class UserController {
 
     @GetMapping
     /**
-     * Retrieves all users.
+     * Retrieves a list of all active users in the system.
      */
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
@@ -32,7 +33,7 @@ public class UserController {
 
     @GetMapping("/{userId}")
     /**
-     * Retrieves user by id.
+     * Retrieves the details of a specific user by their ID.
      */
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long userId) {
         return ResponseEntity.ok(userService.getUserById(userId));
@@ -40,7 +41,7 @@ public class UserController {
 
     @PostMapping
     /**
-     * Creates a new user.
+     * Creates a new user profile in the system.
      */
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
         return ResponseEntity.ok(userService.createUser(request));
@@ -48,7 +49,7 @@ public class UserController {
 
     @PostMapping("/update/{userId}")
     /**
-     * Updates an existing user.
+     * Updates the profile information of an existing user.
      */
     public ResponseEntity<Void> updateUser(@PathVariable Long userId, @RequestBody UpdateUserRequest request) {
         userService.updateUser(userId, request);
@@ -57,12 +58,15 @@ public class UserController {
 
     @DeleteMapping("/{userId}")
     /**
-     * Deletes user.
+     * Deletes a specific user from the system.
      */
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
         return ResponseEntity.ok().build();
     }
+    /**
+     * Retrieves a paginated list of comments where the specified user was mentioned.
+     */
     @GetMapping("/{userId}/mentions")
     public ResponseEntity<com.att.tdp.issueflow.dto.user.MentionsResponse> getMentions(
             @PathVariable Long userId,

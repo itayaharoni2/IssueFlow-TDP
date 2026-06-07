@@ -5,7 +5,8 @@ import lombok.Data;
 
 @Data
 /**
- * Role: Data Transfer Object for attachment response.
+ * Role: Data Transfer Object representing an attachment sent to the client.
+ * It contains the metadata of the uploaded file such as its ID, filename, content type, and associated ticket.
  */
 public class AttachmentResponse {
     private Long id;
@@ -13,6 +14,9 @@ public class AttachmentResponse {
     private String filename;
     private String contentType;
 
+    /**
+     * Constructs an AttachmentResponse object from a given Attachment entity.
+     */
     public AttachmentResponse(Attachment attachment) {
         this.id = attachment.getId();
         this.ticketId = attachment.getTicket().getId();

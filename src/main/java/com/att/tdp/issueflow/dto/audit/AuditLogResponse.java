@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 
 @Data
 /**
- * Role: Data Transfer Object for audit log response.
+ * Role: Data Transfer Object representing a single audit log entry returned to the client.
+ * It encapsulates the details of a system event, including the action, entity, actor, and timestamp.
  */
 public class AuditLogResponse {
     private Long id;
@@ -19,6 +20,9 @@ public class AuditLogResponse {
     private String actor;
     private LocalDateTime timestamp;
 
+    /**
+     * Constructs an AuditLogResponse object from a given AuditLog entity, mapping its properties.
+     */
     public AuditLogResponse(AuditLog auditLog) {
         this.id = auditLog.getId();
         this.action = auditLog.getAction();

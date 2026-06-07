@@ -8,12 +8,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 /**
- * Role: Represents the issue flow application entity or object.
+ * Role: The main entry point for the IssueFlow Spring Boot application.
+ * It bootstraps the application context, configures beans, and starts the embedded web server.
  */
 public class IssueFlowApplication {
 
 	/**
-	 * Executes the main operation.
+	 * Main method that launches the Spring Boot application.
 	 */
 	public static void main(String[] args) {
 		SpringApplication.run(IssueFlowApplication.class, args);

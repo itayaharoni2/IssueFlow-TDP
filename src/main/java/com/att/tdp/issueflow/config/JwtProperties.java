@@ -10,18 +10,18 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 /**
- * Role: Maps custom JWT properties from application.yaml.
- * This class eliminates IDE warnings about "Unknown property 'jwt'".
+ * Role: Maps custom JWT properties from the application configuration
+ * (application.yaml).
+ * It works by binding properties with the "jwt" prefix to the fields of this
+ * class,
+ * making them injectable and accessible throughout the application without
+ * using @Value annotations.
  */
 public class JwtProperties {
 
-    /**
-     * The secret key used for signing JWTs.
-     */
+    // The secret key used for signing JWTs.
     private String secret;
 
-    /**
-     * Token expiration time in milliseconds.
-     */
+    // Token expiration time in milliseconds.
     private long expirationMs;
 }

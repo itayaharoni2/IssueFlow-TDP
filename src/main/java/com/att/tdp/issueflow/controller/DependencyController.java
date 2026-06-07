@@ -14,7 +14,8 @@ import java.util.List;
 @RequestMapping("/tickets/{ticketId}/dependencies")
 @RequiredArgsConstructor
 /**
- * Role: Provides REST API endpoints for dependency.
+ * Role: Provides REST API endpoints for managing ticket dependencies.
+ * It allows clients to declare and query blocker relationships between tickets, ensuring proper workflow sequencing.
  */
 public class DependencyController {
 
@@ -22,7 +23,7 @@ public class DependencyController {
 
     @PostMapping
     /**
-     * Executes the add dependency operation.
+     * Declares that a specific ticket is blocked by another ticket.
      */
     public ResponseEntity<Void> addDependency(@PathVariable Long ticketId,
                                               @Valid @RequestBody CreateDependencyRequest request) {
@@ -32,7 +33,7 @@ public class DependencyController {
 
     @GetMapping
     /**
-     * Retrieves dependencies.
+     * Retrieves all dependencies (blockers and blocked tickets) for a specific ticket.
      */
     public ResponseEntity<List<DependencyResponse>> getDependencies(@PathVariable Long ticketId) {
         return ResponseEntity.ok(dependencyService.getDependencies(ticketId));
@@ -40,7 +41,7 @@ public class DependencyController {
 
     @DeleteMapping("/{blockerId}")
     /**
-     * Executes the remove dependency operation.
+     * Removes an existing dependency relationship between two tickets.
      */
     public ResponseEntity<Void> removeDependency(@PathVariable Long ticketId,
                                                  @PathVariable Long blockerId) {

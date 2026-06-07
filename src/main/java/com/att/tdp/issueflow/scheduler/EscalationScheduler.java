@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 /**
- * Role: Represents the escalation scheduler entity or object.
+ * Role: Background scheduled component responsible for automatically managing overdue tickets.
+ * It periodically triggers the escalation service to raise priorities and flags on tickets that have breached their due dates.
  */
 public class EscalationScheduler {
 
@@ -18,7 +19,7 @@ public class EscalationScheduler {
     // Depending on rules.md, adjust cron as necessary (e.g., hourly, daily)
     @Scheduled(fixedRateString = "${app.escalation.interval:60000}")
     /**
-     * Executes the run escalation operation.
+     * Scheduled task that executes at a configurable interval to find and escalate overdue tickets.
      */
     public void runEscalation() {
         escalationService.escalateOverdueTickets();

@@ -11,7 +11,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 /**
- * Role: Data Transfer Object for mentions response.
+ * Role: Data Transfer Object representing a paginated response of user mentions.
+ * It contains a list of comments where the user was mentioned, along with total count and current page information.
  */
 public class MentionsResponse {
     private List<CommentResponse> data;

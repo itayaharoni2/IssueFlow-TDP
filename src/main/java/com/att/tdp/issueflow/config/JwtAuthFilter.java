@@ -22,7 +22,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 @Slf4j
 /**
- * Role: Represents the jwt auth filter entity or object.
+ * Role: Acts as a security filter that intercepts HTTP requests to authenticate
+ * users via JWT.
+ * It works by extracting the JWT from the Authorization header, validating its
+ * signature and expiration,
+ * and setting the authenticated UserDetails in the Spring SecurityContext.
  */
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -31,22 +35,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     /**
      * In-memory deny-list for logout.
-     * Token string → blacklisted. Lost on restart (acceptable per design decision #7).
+     * Token string → blacklisted. Lost on restart.
      */
     private final Set<String> tokenDenyList = ConcurrentHashMap.newKeySet();
 
     /**
      * Add a raw JWT string to the deny-list (called from AuthService on logout).
      */
-    /**
-     * Executes the blacklist token operation.
-     */
     public void blacklistToken(String token) {
         tokenDenyList.add(token);
     }
 
     /**
-     * Executes the clear deny list operation.
+     * Clears all tokens from the in-memory deny-list.
      */
     public void clearDenyList() {
         tokenDenyList.clear();
@@ -54,11 +55,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     /**
-     * Filters HTTP requests to validate JWT tokens.
+     * Intercepts the request to extract and validate the JWT token.
+     * If valid, it authenticates the user in the security context.
      */
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         String token = extractToken(request);
@@ -70,9 +72,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String username = jwtProvider.extractUsername(token);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
@@ -80,10 +81,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    // ─── private ────────────────────────────────────────────────────────────
-
     /**
-     * Executes the extract token operation.
+     * Extracts the raw JWT token string from the HTTP Authorization header.
      */
     private String extractToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");

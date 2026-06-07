@@ -30,7 +30,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 /**
- * Role: Handles business logic and operations for comment.
+ * Role: Service layer responsible for managing comments on tickets.
+ * It provides operations to retrieve, create, update, and delete comments, automatically parsing and handling user "@" mentions.
  */
 public class CommentService {
 
@@ -43,7 +44,7 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     /**
-     * Retrieves comments by ticket.
+     * Fetches all comments associated with a specific ticket in chronological order, including populated mention metadata.
      */
     public List<CommentResponse> getCommentsByTicket(Long ticketId) {
         // Validation: Check if ticket exists
@@ -62,7 +63,7 @@ public class CommentService {
 
     @Transactional
     /**
-     * Creates a new comment.
+     * Creates a new comment on a ticket, parses it for user mentions, and logs an audit trail.
      */
     public CommentResponse createComment(Long ticketId, CreateCommentRequest request) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
@@ -88,7 +89,7 @@ public class CommentService {
 
     @Transactional
     /**
-     * Updates an existing comment.
+     * Modifies the content of an existing comment, refreshes the parsed mentions, and records the update in the audit log.
      */
     public void updateComment(Long ticketId, Long commentId, UpdateCommentRequest request) {
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
@@ -113,7 +114,7 @@ public class CommentService {
 
     @Transactional
     /**
-     * Deletes comment.
+     * Removes a comment and its associated mentions from the database, leaving an audit log of the deletion.
      */
     public void deleteComment(Long ticketId, Long commentId) {
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
@@ -133,7 +134,7 @@ public class CommentService {
     }
 
     /**
-     * Retrieves current user id.
+     * Helper method to extract the ID of the currently authenticated user from the security context.
      */
     private Long getCurrentUserId() {
         try {
@@ -144,7 +145,7 @@ public class CommentService {
     }
 
     /**
-     * Executes the process mentions operation.
+     * Parses the comment body for "@username" patterns, looks up the corresponding users, and links them as mentions.
      */
     private List<MentionedUserDto> processMentions(Comment comment, String content) {
         commentMentionRepository.deleteByCommentId(comment.getId());

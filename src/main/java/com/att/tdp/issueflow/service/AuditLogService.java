@@ -11,7 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 /**
- * Role: Handles business logic and operations for audit log.
+ * Role: Service layer responsible for maintaining system audit trails.
+ * It provides methods to persist audit events and query logs based on various filters like entity type or actor.
  */
 public class AuditLogService {
 
@@ -19,7 +20,7 @@ public class AuditLogService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     /**
-     * Logs an audit action to the database.
+     * Records a new audit log entry in an independent transaction, ensuring it commits even if the parent transaction fails.
      */
     public void log(AuditAction action, String entityType, Long entityId, Long performedByUserId, String actor) {
         AuditLog auditLog = new AuditLog();
@@ -31,6 +32,9 @@ public class AuditLogService {
         auditLogRepository.save(auditLog);
     }
 
+    /**
+     * Retrieves and filters audit logs based on the provided parameters, mapping them to response DTOs.
+     */
     @Transactional(readOnly = true)
     public java.util.List<com.att.tdp.issueflow.dto.audit.AuditLogResponse> getLogs(String entityType, Long entityId, AuditAction action, String actor) {
         // For Phase 3, we just return all logs or do simple filtering

@@ -18,7 +18,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 /**
- * Role: Handles business logic and operations for auth.
+ * Role: Service layer managing user authentication and session states.
+ * It integrates with Spring Security to validate credentials, generates and invalidates JWT tokens, and retrieves the current authenticated user's profile.
  */
 public class AuthService {
 
@@ -28,12 +29,8 @@ public class AuthService {
     private final UserRepository userRepository;
 
     /**
-     * Authenticate username + password and return a signed JWT.
-     * Spring Security's AuthenticationManager validates credentials and throws
-     * BadCredentialsException on failure (mapped to 401 by Spring).
-     */
-    /**
-     * Executes the login operation.
+     * Authenticates a user's credentials against the database and issues a signed JWT upon success.
+     * Delegates validation to Spring Security's AuthenticationManager.
      */
     public LoginResponse login(LoginRequest request) {
         // Delegates to DaoAuthenticationProvider → UserDetailsServiceImpl → DB
@@ -47,24 +44,14 @@ public class AuthService {
     }
 
     /**
-     * Invalidate the current request's JWT by adding it to the deny-list.
-     *
-     * @param rawToken the raw JWT string extracted from the Authorization header
-     *                 (without the "Bearer " prefix — the controller passes it trimmed)
-     */
-    /**
-     * Executes the logout operation.
+     * Processes a user logout by invalidating the provided JWT, adding it to a blacklist to prevent further use.
      */
     public void logout(String rawToken) {
         jwtAuthFilter.blacklistToken(rawToken);
     }
 
     /**
-     * Return the authenticated user's profile.
-     * Reads the username from the SecurityContext (set by JwtAuthFilter).
-     */
-    /**
-     * Retrieves current user.
+     * Fetches the profile details of the user who is currently authenticated in the Spring Security context.
      */
     public UserResponse getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

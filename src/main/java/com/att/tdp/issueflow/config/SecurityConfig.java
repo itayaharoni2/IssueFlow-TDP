@@ -20,10 +20,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity          // enables @PreAuthorize on controllers
+@EnableMethodSecurity // enables @PreAuthorize on controllers
 @RequiredArgsConstructor
 /**
- * Role: Represents the security config entity or object.
+ * Role: Configures the core security filters, authentication providers, and
+ * HTTP request authorization rules.
+ * It ensures the API is stateless by disabling sessions and integrates the
+ * JwtAuthFilter into the security chain.
  */
 public class SecurityConfig {
 
@@ -31,62 +34,56 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
 
     @Bean
-    /**
-     * Executes the filter chain operation.
-     */
+    // Defines the HTTP security filter chain, including endpoint authorization
+    // rules, exception handling, and stateless session management.
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // Disable CSRF — stateless REST API
-            .csrf(AbstractHttpConfigurer::disable)
+                // Disable CSRF — stateless REST API
+                .csrf(AbstractHttpConfigurer::disable)
 
-            // Stateless: no session, no cookies
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Stateless: no session, no cookies
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            // Authorization rules
-            .authorizeHttpRequests(auth -> auth
-                // Public endpoints (no JWT required)
-                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                // Authorization rules
+                .authorizeHttpRequests(auth -> auth
+                        // Public endpoints (no JWT required)
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
 
-                // Everything else requires a valid JWT
-                .anyRequest().authenticated()
-            )
+                        // Everything else requires a valid JWT
+                        .anyRequest().authenticated())
 
-            // Plug in JWT filter before the default username/password filter
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                // Plug in JWT filter before the default username/password filter
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
-            // Return 401 on missing/invalid token (not a redirect to a login form)
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(401);
-                    response.setContentType("application/json");
-                    response.getWriter().write(
-                        "{\"error\":\"Unauthorized\",\"message\":\"" + authException.getMessage() + "\"}");
-                })
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    response.setStatus(403);
-                    response.setContentType("application/json");
-                    response.getWriter().write(
-                        "{\"error\":\"Forbidden\",\"message\":\"" + accessDeniedException.getMessage() + "\"}");
-                })
-            );
+                // Return 401 on missing/invalid token (not a redirect to a login form)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(401);
+                            response.setContentType("application/json");
+                            response.getWriter().write(
+                                    "{\"error\":\"Unauthorized\",\"message\":\"" + authException.getMessage() + "\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(403);
+                            response.setContentType("application/json");
+                            response.getWriter().write(
+                                    "{\"error\":\"Forbidden\",\"message\":\"" + accessDeniedException.getMessage()
+                                            + "\"}");
+                        }));
 
         return http.build();
     }
 
     @Bean
-    /**
-     * Executes the password encoder operation.
-     */
+    // Provides a BCryptPasswordEncoder bean for hashing and verifying passwords.
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    /**
-     * Executes the authentication provider operation.
-     */
+    // Configures a DaoAuthenticationProvider with the custom UserDetailsService and
+    // password encoder.
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
@@ -95,9 +92,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    /**
-     * Executes the authentication manager operation.
-     */
+    // Exposes the AuthenticationManager bean for use in programmatic
+    // authentication.
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

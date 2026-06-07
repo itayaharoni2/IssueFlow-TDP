@@ -19,7 +19,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 /**
- * Role: Represents the comment mention entity or object.
+ * Role: Represents a many-to-many join entity tracking user mentions within comments.
+ * It links a specific comment to a mentioned user, ensuring notifications and queries can efficiently find relevant mentions.
  */
 public class CommentMention {
 

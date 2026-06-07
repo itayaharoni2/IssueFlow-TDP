@@ -17,7 +17,8 @@ import java.time.OffsetDateTime;
 @Setter
 @NoArgsConstructor
 /**
- * Role: Represents the ticket entity or object.
+ * Role: Represents a core issue or task tracked within a project.
+ * It contains properties like status, priority, and assignees, and includes features for soft deletion, deadlines, and optimistic locking.
  */
 public class Ticket {
 

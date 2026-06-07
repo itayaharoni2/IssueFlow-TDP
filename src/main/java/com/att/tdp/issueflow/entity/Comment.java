@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 /**
- * Role: Represents the comment entity or object.
+ * Role: Represents a user comment made on a specific ticket.
+ * It stores the text content, associates it with the author and ticket, and tracks creation/update timestamps along with versioning for optimistic locking.
  */
 public class Comment {
 

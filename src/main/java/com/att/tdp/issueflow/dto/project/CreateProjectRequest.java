@@ -6,7 +6,8 @@ import lombok.Data;
 
 @Data
 /**
- * Role: Data Transfer Object for create project request.
+ * Role: Data Transfer Object representing the payload to create a new project.
+ * It validates that a project name and an owner ID are provided by the client.
  */
 public class CreateProjectRequest {
 

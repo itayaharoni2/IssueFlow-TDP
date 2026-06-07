@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 /**
- * Role: Handles business logic and operations for dependency.
+ * Role: Service layer responsible for managing "blocked by" relationships between tickets.
+ * It enforces business rules to prevent circular dependencies and cross-project relationships.
  */
 public class DependencyService {
 
@@ -26,7 +27,7 @@ public class DependencyService {
 
     @Transactional
     /**
-     * Executes the add dependency operation.
+     * Creates a new dependency where a given ticket becomes blocked by another, verifying there are no cycles.
      */
     public void addDependency(Long ticketId, Long blockedById) {
         if (ticketId.equals(blockedById)) {
@@ -62,7 +63,7 @@ public class DependencyService {
 
     @Transactional(readOnly = true)
     /**
-     * Retrieves dependencies.
+     * Retrieves a list of all tickets that are currently blocking the specified ticket.
      */
     public List<DependencyResponse> getDependencies(Long ticketId) {
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
@@ -75,7 +76,7 @@ public class DependencyService {
 
     @Transactional
     /**
-     * Executes the remove dependency operation.
+     * Unblocks a ticket by removing the specific dependency relationship with another ticket.
      */
     public void removeDependency(Long ticketId, Long blockedById) {
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)

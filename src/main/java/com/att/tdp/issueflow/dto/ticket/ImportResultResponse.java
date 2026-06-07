@@ -10,7 +10,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 /**
- * Role: Data Transfer Object for import result response.
+ * Role: Data Transfer Object representing the outcome of a bulk ticket import operation.
+ * It provides the number of successfully created tickets, the number of failures, and a list of specific error messages.
  */
 public class ImportResultResponse {
     private int created;

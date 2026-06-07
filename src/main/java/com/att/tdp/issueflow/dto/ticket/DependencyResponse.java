@@ -6,13 +6,17 @@ import lombok.Data;
 
 @Data
 /**
- * Role: Data Transfer Object for dependency response.
+ * Role: Data Transfer Object representing a ticket dependency relationship.
+ * It provides a lightweight view of a related ticket, exposing just its ID, title, and current status.
  */
 public class DependencyResponse {
     private Long id;
     private String title;
     private TicketStatus status;
 
+    /**
+     * Constructs a DependencyResponse object from a given Ticket entity.
+     */
     public DependencyResponse(Ticket ticket) {
         this.id = ticket.getId();
         this.title = ticket.getTitle();

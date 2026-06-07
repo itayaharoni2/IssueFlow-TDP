@@ -5,7 +5,8 @@ package com.att.tdp.issueflow.entity.enums;
  * LOW(0) → MEDIUM(1) → HIGH(2) → CRITICAL(3)
  */
 /**
- * Role: Represents the ticket priority entity or object.
+ * Role: Enum defining the urgency levels for a ticket.
+ * It is ordered from LOW to CRITICAL so that ordinal values can be used to naturally reflect the escalation progression.
  */
 public enum TicketPriority {
     LOW,

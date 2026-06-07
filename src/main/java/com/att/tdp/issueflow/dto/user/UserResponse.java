@@ -6,7 +6,8 @@ import lombok.Getter;
 
 @Getter
 /**
- * Role: Data Transfer Object for user response.
+ * Role: Data Transfer Object representing a user's public profile returned to the client.
+ * It encapsulates the user's basic identification and contact details while excluding sensitive information like passwords.
  */
 public class UserResponse {
 
@@ -16,6 +17,9 @@ public class UserResponse {
     private final String fullName;
     private final Role role;
 
+    /**
+     * Constructs a UserResponse object from a given User entity.
+     */
     public UserResponse(User user) {
         this.id       = user.getId();
         this.username = user.getUsername();

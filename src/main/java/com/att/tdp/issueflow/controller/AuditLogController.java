@@ -13,12 +13,16 @@ import java.util.List;
 @RequestMapping("/audit-logs")
 @RequiredArgsConstructor
 /**
- * Role: Provides REST API endpoints for audit log.
+ * Role: Provides REST API endpoints for querying system audit logs.
+ * It exposes read-only operations to fetch audit trails based on entity types, IDs, actions, or specific actors.
  */
 public class AuditLogController {
 
     private final AuditLogService auditLogService;
 
+    /**
+     * Retrieves a list of audit logs, optionally filtered by entity type, entity ID, action, or actor.
+     */
     @GetMapping
     public ResponseEntity<List<AuditLogResponse>> getLogs(
             @RequestParam(required = false) String entityType,

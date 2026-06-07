@@ -20,7 +20,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 /**
- * Role: Handles business logic and operations for comment mention.
+ * Role: Service layer for querying user mentions across comments.
+ * It powers features like notification feeds by retrieving paginated lists of comments where a specific user was mentioned.
  */
 public class CommentMentionService {
 
@@ -29,7 +30,7 @@ public class CommentMentionService {
 
     @Transactional(readOnly = true)
     /**
-     * Retrieves mentions.
+     * Fetches a paginated list of comments in which the specified user has been mentioned, fully populated with other mentioned users.
      */
     public MentionsResponse getMentions(Long userId, int page, int pageSize) {
         if (!userRepository.existsById(userId)) {

@@ -6,7 +6,8 @@ import lombok.Data;
 
 @Data
 /**
- * Role: Data Transfer Object for create comment request.
+ * Role: Data Transfer Object representing the payload to create a new comment.
+ * It validates that an author ID and non-empty content are provided when a client submits a new comment.
  */
 public class CreateCommentRequest {
 

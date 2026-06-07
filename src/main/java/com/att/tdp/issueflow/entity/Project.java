@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 /**
- * Role: Represents the project entity or object.
+ * Role: Represents a project containing multiple tickets within the system.
+ * It stores basic information like name and description, tracks the owner, and handles soft deletions via a deletedAt timestamp.
  */
 public class Project {
 

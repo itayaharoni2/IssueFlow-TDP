@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 /**
- * Role: Represents the audit log entity or object.
+ * Role: Represents a system audit log entry for tracking changes to entities.
+ * It records the action performed, the target entity, the actor (user or system), and the exact timestamp of the event.
  */
 public class AuditLog {
 

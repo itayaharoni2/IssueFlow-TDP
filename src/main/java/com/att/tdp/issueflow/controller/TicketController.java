@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,16 +21,16 @@ import java.util.List;
 @RequestMapping("/tickets")
 @RequiredArgsConstructor
 /**
- * Role: Provides REST API endpoints for ticket.
+ * Role: Provides REST API endpoints for managing tickets.
+ * It handles the full lifecycle of tickets including creation, updates, soft
+ * deletion, and CSV import/export.
  */
 public class TicketController {
 
     private final TicketService ticketService;
 
     @GetMapping
-    /**
-     * Retrieves tickets by project.
-     */
+    // Retrieves all active tickets associated with a specific project.
     public ResponseEntity<List<TicketResponse>> getTicketsByProject(@RequestParam Long projectId) {
         return ResponseEntity.ok(ticketService.getActiveTickets(projectId));
     }
@@ -40,25 +38,23 @@ public class TicketController {
     // Must be mapped before /{ticketId} to avoid collision
     @GetMapping("/deleted")
     @PreAuthorize("hasRole('ADMIN')")
-    /**
-     * Retrieves deleted tickets.
-     */
+    // Retrieves all soft-deleted tickets for a specific project. Requires ADMIN
+    // privileges.
     public ResponseEntity<List<TicketResponse>> getDeletedTickets(@RequestParam Long projectId) {
         return ResponseEntity.ok(ticketService.getDeletedTickets(projectId));
     }
-    
+
     // Export tickets to CSV
     @GetMapping("/export")
-    /**
-     * Executes the export tickets operation.
-     */
+    // Exports all tickets of a specific project to a CSV file and streams it in the
+    // HTTP response.
     public void exportTickets(@RequestParam Long projectId, HttpServletResponse response) throws IOException {
         response.setContentType("text/csv");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"tickets.csv\"");
         ticketService.exportTicketsToCsv(projectId, response.getWriter());
     }
-    
-    // Import tickets from CSV
+
+    // Imports multiple tickets into a specific project from an uploaded CSV file.
     @PostMapping("/import")
     public ResponseEntity<ImportResultResponse> importTickets(
             @RequestParam("projectId") Long projectId,
@@ -67,34 +63,27 @@ public class TicketController {
     }
 
     @GetMapping("/{ticketId}")
-    /**
-     * Retrieves ticket by id.
-     */
+    // Retrieves the details of a specific ticket by its ID.
     public ResponseEntity<TicketResponse> getTicketById(@PathVariable Long ticketId) {
         return ResponseEntity.ok(ticketService.getTicketById(ticketId));
     }
 
     @PostMapping
-    /**
-     * Creates a new ticket.
-     */
+    // Creates a new ticket within a project using the provided details.
     public ResponseEntity<TicketResponse> createTicket(@Valid @RequestBody CreateTicketRequest request) {
         return ResponseEntity.ok(ticketService.createTicket(request));
     }
 
     @PatchMapping("/{ticketId}")
-    /**
-     * Updates an existing ticket.
-     */
+    // Updates the properties of an existing ticket.
     public ResponseEntity<Void> updateTicket(@PathVariable Long ticketId, @RequestBody UpdateTicketRequest request) {
         ticketService.updateTicket(ticketId, request);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{ticketId}")
-    /**
-     * Executes the soft delete ticket operation.
-     */
+    // Soft deletes a specific ticket, effectively archiving it without permanent
+    // removal.
     public ResponseEntity<Void> softDeleteTicket(@PathVariable Long ticketId) {
         ticketService.softDeleteTicket(ticketId);
         return ResponseEntity.ok().build();
@@ -102,9 +91,8 @@ public class TicketController {
 
     @PostMapping("/{ticketId}/restore")
     @PreAuthorize("hasRole('ADMIN')")
-    /**
-     * Executes the restore ticket operation.
-     */
+    // Restores a previously soft-deleted ticket back to an active state. Requires
+    // ADMIN privileges.
     public ResponseEntity<Void> restoreTicket(@PathVariable Long ticketId) {
         ticketService.restoreTicket(ticketId);
         return ResponseEntity.ok().build();

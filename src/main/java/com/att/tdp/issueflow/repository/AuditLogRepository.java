@@ -7,7 +7,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 /**
- * Role: Handles database access and queries for audit log.
+ * Role: Data Access Object for AuditLog entities.
+ * It provides standard CRUD operations and supports complex dynamic queries via JpaSpecificationExecutor.
  */
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long>, JpaSpecificationExecutor<AuditLog> {
 }

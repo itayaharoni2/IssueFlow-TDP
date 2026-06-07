@@ -5,7 +5,8 @@ import lombok.Data;
 
 @Data
 /**
- * Role: Data Transfer Object for project response.
+ * Role: Data Transfer Object representing a project returned to the client.
+ * It encapsulates the basic project details, including its name, description, and the ID of its owner.
  */
 public class ProjectResponse {
     private Long id;
@@ -13,6 +14,9 @@ public class ProjectResponse {
     private String description;
     private Long ownerId;
 
+    /**
+     * Constructs a ProjectResponse object from a given Project entity.
+     */
     public ProjectResponse(Project project) {
         this.id = project.getId();
         this.name = project.getName();

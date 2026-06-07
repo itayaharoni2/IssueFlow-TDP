@@ -8,7 +8,8 @@ import java.time.OffsetDateTime;
 
 @Data
 /**
- * Role: Data Transfer Object for update ticket request.
+ * Role: Data Transfer Object representing the payload to update an existing ticket.
+ * It contains optional fields that a client can modify, such as status, priority, assignee, and due date.
  */
 public class UpdateTicketRequest {
     private String title;

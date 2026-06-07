@@ -9,16 +9,23 @@ import java.util.Optional;
 
 @Repository
 /**
- * Role: Handles database access and queries for project.
+ * Role: Data Access Object for Project entities.
+ * It provides operations to query active or soft-deleted projects and perform standard CRUD operations.
  */
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
-    /** Active (non-deleted) projects */
+    /**
+     * Retrieves all projects that have not been soft-deleted.
+     */
     List<Project> findAllByDeletedAtIsNull();
 
-    /** Soft-deleted projects */
+    /**
+     * Retrieves all projects that have been soft-deleted.
+     */
     List<Project> findAllByDeletedAtIsNotNull();
 
-    /** Active project by ID */
+    /**
+     * Retrieves a specific project by its ID, ensuring it has not been soft-deleted.
+     */
     Optional<Project> findByIdAndDeletedAtIsNull(Long id);
 }

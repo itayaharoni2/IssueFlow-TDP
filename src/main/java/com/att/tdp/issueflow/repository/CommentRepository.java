@@ -8,9 +8,13 @@ import java.util.List;
 
 @Repository
 /**
- * Role: Handles database access and queries for comment.
+ * Role: Data Access Object for Comment entities.
+ * It provides standard CRUD operations and allows retrieving a chronologically ordered list of comments for a given ticket.
  */
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
+    /**
+     * Retrieves all comments for a specific ticket, ordered by creation time from oldest to newest.
+     */
     List<Comment> findAllByTicketIdOrderByCreatedAtAsc(Long ticketId);
 }

@@ -7,7 +7,8 @@ import java.util.List;
 
 @Data
 /**
- * Role: Data Transfer Object for comment response.
+ * Role: Data Transfer Object representing a comment sent back to the client.
+ * It contains the comment's content, the author and ticket it belongs to, and a list of any users mentioned in it.
  */
 public class CommentResponse {
     private Long id;
@@ -16,6 +17,9 @@ public class CommentResponse {
     private String content;
     private List<MentionedUserDto> mentionedUsers;
 
+    /**
+     * Constructs a CommentResponse based on a Comment entity and a list of its mentioned users.
+     */
     public CommentResponse(Comment comment, List<MentionedUserDto> mentionedUsers) {
         this.id = comment.getId();
         this.ticketId = comment.getTicket().getId();

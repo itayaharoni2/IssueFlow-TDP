@@ -11,7 +11,8 @@ import java.time.OffsetDateTime;
 
 @Data
 /**
- * Role: Data Transfer Object for create ticket request.
+ * Role: Data Transfer Object representing the payload to create a new ticket.
+ * It encapsulates required fields like title, priority, type, and project ID, alongside optional fields like assignee and due date.
  */
 public class CreateTicketRequest {
 

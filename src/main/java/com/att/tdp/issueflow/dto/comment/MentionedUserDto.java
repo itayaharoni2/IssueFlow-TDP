@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 /**
- * Role: Data Transfer Object for mentioned user dto.
+ * Role: Data Transfer Object representing a user who was mentioned in a comment.
+ * It encapsulates basic user details like ID, username, and full name for quick reference in API responses.
  */
 public class MentionedUserDto {
     private Long id;

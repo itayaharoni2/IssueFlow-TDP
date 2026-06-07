@@ -21,7 +21,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 /**
- * Role: Handles business logic and operations for attachment.
+ * Role: Service layer responsible for processing file attachments on tickets.
+ * It handles the uploading, validation (e.g. content types), storage, and deletion of attachments while writing audit logs.
  */
 public class AttachmentService {
 
@@ -37,7 +38,7 @@ public class AttachmentService {
 
     @Transactional
     /**
-     * Executes the upload attachment operation.
+     * Validates and saves an uploaded file as an attachment to the specified ticket, generating an audit log.
      */
     public AttachmentResponse uploadAttachment(Long ticketId, MultipartFile file) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
@@ -74,7 +75,7 @@ public class AttachmentService {
 
     @Transactional
     /**
-     * Deletes attachment.
+     * Removes an attachment from a ticket and logs the deletion action.
      */
     public void deleteAttachment(Long ticketId, Long attachmentId) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
@@ -94,7 +95,7 @@ public class AttachmentService {
     }
 
     /**
-     * Retrieves current user id.
+     * Helper method to retrieve the ID of the currently authenticated user from the security context.
      */
     private Long getCurrentUserId() {
         try {
@@ -105,7 +106,7 @@ public class AttachmentService {
     }
 
     /**
-     * Retrieves current user entity.
+     * Helper method to fetch the full User entity for the currently authenticated user.
      */
     private User getCurrentUserEntity() {
         Long id = getCurrentUserId();

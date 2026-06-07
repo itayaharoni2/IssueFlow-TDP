@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 /**
- * Role: Handles business logic and operations for user.
+ * Role: Service layer responsible for managing user accounts.
+ * It handles the creation of users, securely encoding passwords, updating roles/profiles, and managing user deletions.
  */
 public class UserService {
 
@@ -29,7 +30,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     /**
-     * Retrieves all users.
+     * Retrieves a list of all registered users in the system.
      */
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
@@ -39,7 +40,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     /**
-     * Retrieves user by id.
+     * Retrieves the specific profile details for a user by their unique identifier.
      */
     public UserResponse getUserById(Long userId) {
         User user = userRepository.findById(userId)
@@ -49,7 +50,7 @@ public class UserService {
 
     @Transactional
     /**
-     * Creates a new user.
+     * Registers a new user, ensuring username and email uniqueness, and securely hashing their password.
      */
     public UserResponse createUser(CreateUserRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -77,7 +78,7 @@ public class UserService {
 
     @Transactional
     /**
-     * Updates an existing user.
+     * Applies partial updates to a user's profile or security role.
      */
     public void updateUser(Long userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
@@ -108,7 +109,7 @@ public class UserService {
 
     @Transactional
     /**
-     * Deletes user.
+     * Permanently deletes a user from the system and logs the action.
      */
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)

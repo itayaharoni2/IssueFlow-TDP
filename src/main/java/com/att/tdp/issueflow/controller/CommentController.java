@@ -15,7 +15,8 @@ import java.util.List;
 @RequestMapping("/tickets/{ticketId}/comments")
 @RequiredArgsConstructor
 /**
- * Role: Provides REST API endpoints for comment.
+ * Role: Provides REST API endpoints for managing ticket comments.
+ * It supports retrieving, creating, updating, and deleting comments on specific tickets via the CommentService.
  */
 public class CommentController {
 
@@ -23,7 +24,7 @@ public class CommentController {
 
     @GetMapping
     /**
-     * Retrieves comments.
+     * Retrieves all comments associated with a specific ticket.
      */
     public ResponseEntity<List<CommentResponse>> getComments(@PathVariable Long ticketId) {
         return ResponseEntity.ok(commentService.getCommentsByTicket(ticketId));
@@ -31,7 +32,7 @@ public class CommentController {
 
     @PostMapping
     /**
-     * Executes the add comment operation.
+     * Adds a new comment to a specific ticket.
      */
     public ResponseEntity<CommentResponse> addComment(@PathVariable Long ticketId, @Valid @RequestBody CreateCommentRequest request) {
         return ResponseEntity.ok(commentService.createComment(ticketId, request));
@@ -39,7 +40,7 @@ public class CommentController {
 
     @PatchMapping("/{commentId}")
     /**
-     * Updates an existing comment.
+     * Updates the content of an existing comment on a ticket.
      */
     public ResponseEntity<Void> updateComment(@PathVariable Long ticketId, @PathVariable Long commentId, @Valid @RequestBody UpdateCommentRequest request) {
         commentService.updateComment(ticketId, commentId, request);
@@ -48,7 +49,7 @@ public class CommentController {
 
     @DeleteMapping("/{commentId}")
     /**
-     * Deletes comment.
+     * Deletes a specific comment from a ticket.
      */
     public ResponseEntity<Void> deleteComment(@PathVariable Long ticketId, @PathVariable Long commentId) {
         commentService.deleteComment(ticketId, commentId);

@@ -8,7 +8,8 @@ import lombok.Data;
 
 @Data
 /**
- * Role: Data Transfer Object for create user request.
+ * Role: Data Transfer Object representing the payload to create a new user.
+ * It enforces validation rules for required fields like username, email, full name, and role.
  */
 public class CreateUserRequest {
 

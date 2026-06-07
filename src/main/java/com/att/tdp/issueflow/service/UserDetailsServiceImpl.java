@@ -19,7 +19,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 /**
- * Role: Handles business logic and operations for user details impl.
+ * Role: Implementation of Spring Security's UserDetailsService interface.
+ * It bridges the application's User entity with Spring Security's authentication mechanisms.
  */
 public class UserDetailsServiceImpl implements UserDetailsService {
 
@@ -27,7 +28,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     /**
-     * Executes the load user by username operation.
+     * Looks up a user by username and constructs a Spring Security UserDetails object populated with granted authorities.
      */
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
