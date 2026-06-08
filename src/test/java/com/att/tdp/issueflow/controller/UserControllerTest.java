@@ -24,7 +24,8 @@ class UserControllerTest extends BaseIntegrationTest {
                                 "username", "alice",
                                 "email", "alice@example.com",
                                 "fullName", "Alice Smith",
-                                "password", "password123"
+                                "password", "password123",
+                                "role", "DEVELOPER"
                         ))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -44,7 +45,7 @@ class UserControllerTest extends BaseIntegrationTest {
                                 "email", "bob@example.com",
                                 "fullName", "Bob Jones",
                                 "role", "ADMIN",
-                                "password", "mypassword"
+                                "password", "mypassword1"
                         ))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.password").doesNotExist());
@@ -60,7 +61,8 @@ class UserControllerTest extends BaseIntegrationTest {
                                 "username", "alice",
                                 "email", "alice2@example.com",
                                 "fullName", "Alice 2",
-                                "password", "password123"
+                                "password", "password123",
+                                "role", "DEVELOPER"
                         ))))
                 .andExpect(status().is4xxClientError());
     }
@@ -75,7 +77,8 @@ class UserControllerTest extends BaseIntegrationTest {
                                 "username", "alice2",
                                 "email", "alice@example.com",
                                 "fullName", "Alice 2",
-                                "password", "password123"
+                                "password", "password123",
+                                "role", "DEVELOPER"
                         ))))
                 .andExpect(status().is4xxClientError());
     }
@@ -88,7 +91,8 @@ class UserControllerTest extends BaseIntegrationTest {
                                 "username", "alice",
                                 "email", "not-an-email",
                                 "fullName", "Alice",
-                                "password", "password123"
+                                "password", "password123",
+                                "role", "DEVELOPER"
                         ))))
                 .andExpect(status().isBadRequest());
     }
@@ -100,7 +104,8 @@ class UserControllerTest extends BaseIntegrationTest {
                         .content(json(Map.of(
                                 "email", "alice@example.com",
                                 "fullName", "Alice",
-                                "password", "password123"
+                                "password", "password123",
+                                "role", "DEVELOPER"
                         ))))
                 .andExpect(status().isBadRequest());
     }

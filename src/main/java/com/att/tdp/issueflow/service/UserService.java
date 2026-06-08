@@ -61,7 +61,7 @@ public class UserService {
         user.setUsername(HtmlUtils.htmlEscape(request.getUsername()));
         user.setEmail(request.getEmail());
         user.setFullName(HtmlUtils.htmlEscape(request.getFullName()));
-        user.setRole(com.att.tdp.issueflow.entity.enums.Role.DEVELOPER);
+        user.setRole(request.getRole());
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 

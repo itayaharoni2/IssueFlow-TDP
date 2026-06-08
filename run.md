@@ -14,6 +14,18 @@ docker compose up -d
 ```
 The database will be available at `localhost:5432/issueflow` with user `issueflow` and password `issueflow`.
 
+## Build the Project & Install Dependencies
+To fetch all required Maven dependencies and compile the project into an executable JAR:
+
+* **Windows (PowerShell/CMD)**:
+  ```powershell
+  .\mvnw.cmd clean install -DskipTests
+  ```
+* **macOS / Linux (Bash/Zsh)**:
+  ```bash
+  ./mvnw clean install -DskipTests
+  ```
+
 ## Application Startup
 To run the Spring Boot application locally:
 
@@ -32,12 +44,6 @@ To run the Spring Boot application locally:
 
 The server starts on port `8080` by default.
 
-## Environment Variables
-The application uses default settings from `application.yaml`. You can customize them via the following environment variables if needed:
-* `SPRING_DATASOURCE_URL` (Default: `jdbc:postgresql://localhost:5432/issueflow`)
-* `SPRING_DATASOURCE_USERNAME` (Default: `issueflow`)
-* `SPRING_DATASOURCE_PASSWORD` (Default: `issueflow`)
-* `SERVER_PORT` (Default: `8080`)
 
 ## Running Tests
 To run all automated integration and unit tests (uses isolated H2 database):

@@ -256,7 +256,7 @@ class TicketLifecycleTest extends BaseIntegrationTest {
         ticket.setDeletedAt(LocalDateTime.now());
         ticketRepository.save(ticket);
 
-        mockMvc.perform(get("/tickets/project/" + p.getId() + "/deleted")
+        mockMvc.perform(get("/tickets/deleted?projectId=" + p.getId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
@@ -268,7 +268,7 @@ class TicketLifecycleTest extends BaseIntegrationTest {
         Project p = createProject(admin, "P1");
         String devToken = loginAsDeveloper("dev1");
 
-        mockMvc.perform(get("/tickets/project/" + p.getId() + "/deleted")
+        mockMvc.perform(get("/tickets/deleted?projectId=" + p.getId())
                         .header("Authorization", "Bearer " + devToken))
                 .andExpect(status().isForbidden());
     }

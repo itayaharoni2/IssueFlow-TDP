@@ -33,4 +33,7 @@ public class CreateUserRequest {
     @Size(min = 8, max = 128, message = "Password must be between 8 and 128 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).+$", message = "Password must contain at least one letter and one number")
     private String password;
+
+    @NotNull(message = "Role is required")
+    private Role role;
 }

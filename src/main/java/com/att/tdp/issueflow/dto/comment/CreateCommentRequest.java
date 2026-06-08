@@ -1,6 +1,5 @@
 package com.att.tdp.issueflow.dto.comment;
 
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -14,7 +13,6 @@ import lombok.Data;
 public class CreateCommentRequest {
 
     @NotNull(message = "AuthorId is required")
-    @Max(value = 50, message = "AuthorId must not exceed 50")
     private Long authorId;
 
     @NotBlank(message = "Content is required")

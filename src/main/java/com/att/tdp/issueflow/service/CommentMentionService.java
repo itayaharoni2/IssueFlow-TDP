@@ -37,7 +37,7 @@ public class CommentMentionService {
             throw new ResourceNotFoundException("User not found");
         }
 
-        Pageable pageable = PageRequest.of(Math.max(0, page - 1), pageSize);
+        Pageable pageable = PageRequest.of(Math.max(0, page - 1), pageSize, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "comment.createdAt"));
         Page<CommentMention> mentionsPage = commentMentionRepository.findByUserId(userId, pageable);
 
         List<CommentResponse> data = mentionsPage.getContent().stream().map(mention -> {

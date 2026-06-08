@@ -42,12 +42,12 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.getActiveTickets(projectId, PageRequest.of(page - 1, size)));
     }
 
-    @GetMapping("/project/{projectId}/deleted")
+    @GetMapping("/deleted")
     @PreAuthorize("hasRole('ADMIN')")
     // Retrieves a list of all soft-deleted tickets for a specific project. Requires ADMIN
     // privileges.
     public ResponseEntity<PaginatedResponse<TicketResponse>> getDeletedTickets(
-            @PathVariable Long projectId,
+            @RequestParam Long projectId,
             @RequestParam(defaultValue = "1") @Min(1) int page,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
         return ResponseEntity.ok(ticketService.getDeletedTickets(projectId, PageRequest.of(page - 1, size)));

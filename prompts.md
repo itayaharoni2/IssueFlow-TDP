@@ -4,14 +4,14 @@ This document details the interaction with the AI assistant during the design an
 
 ## AI Model Used
 * **Model**: 
-- Gemini 3.1 Pro for simple tasks
+- Gemini 3.1 Pro for simple tasks and questions 
 - Claude 3.5 Sonnet / Opus for more complicated tasks like Architecture decisions and API Contract extraction
 - (via Antigravity IDE)
 
 ## AI Usage Summary
 
 1. AI tools were used as development assistants for requirement analysis, API contract extraction, implementation planning, test planning, and documentation review.
-2. All AI-generated suggestions were reviewed, adapted, and validated through compilation, manual testing, and automated tests.
+2. All AI-generated suggestions were reviewed, adapted, and validated through compilation, manual testing, and automated tests. I am fully accountable for that code.
 
 ## Key Prompts
 * **Prompt 1 (Analysis)**: *"go over the current project skeleton (do not change anything) and tell me what you understand from this structure that i need to implement"*
@@ -22,6 +22,6 @@ This document details the interaction with the AI assistant during the design an
 * **Prompt 6 (Plan)**: *"Create an implementation plan for this project in phases..."*
 * **Prompt 7 (Test Plan & Ambiguities)**: *"Review the assignment requirements, identify ambiguous or risky areas, and create a comprehensive test plan."*
 
-### Prompt 8 - 14: implementing the project according to the plan phase by phase
+* **Prompt 8 - 14**: Implementing the project in steps according to the plan (rules.md)
 
-* **Prompt 15+ (Security & Stress Testing)**: *"Conduct additional testing for the project, analyzing and hardening the system against SQL injection, exploring DDoS mitigation strategies, and performing stress testing scenarios."*
+* **Prompt 15+ (Security & Stress Testing)**: *"Conduct additional testing for the project, analyzing and hardening the system against SQL injection, and performing stress testing scenarios."*

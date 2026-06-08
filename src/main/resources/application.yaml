@@ -22,7 +22,7 @@ spring:
   sql:
     init:
       platform: postgres
-      mode: always
+      mode: never
   servlet:
     multipart:
       max-file-size: 10MB
