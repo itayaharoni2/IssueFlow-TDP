@@ -45,7 +45,7 @@ Because the application uses **JWT (JSON Web Tokens)** for authentication, the b
 
 
 ## Future Improvements
-If I were to continue developing this project, I would implement several enhancements for security and usability. Specifically, I would handle DDoS attacks on the client side, introduce refresh tokens for more secure and seamless authentication sessions, and build a more robust, modern frontend interface.
+If I were to continue developing this project, I would implement several enhancements for security and usability. Specifically, I would handle DDoS attacks on the client side, introduce refresh tokens for more secure and seamless authentication sessions, and build a more robust, modern frontend interface (Built a basic front-end for my testing, didnt upload it to GitHub).
 
 ---
 
