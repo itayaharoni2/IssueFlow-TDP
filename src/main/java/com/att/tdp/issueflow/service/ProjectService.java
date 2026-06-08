@@ -17,6 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.att.tdp.issueflow.dto.common.PaginatedResponse;
+import org.springframework.web.util.HtmlUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -36,20 +40,18 @@ public class ProjectService {
     /**
      * Fetches a list of all current projects that have not been soft-deleted.
      */
-    public List<ProjectResponse> getActiveProjects() {
-        return projectRepository.findAllByDeletedAtIsNull().stream()
-                .map(ProjectResponse::new)
-                .collect(Collectors.toList());
+    public PaginatedResponse<ProjectResponse> getActiveProjects(Pageable pageable) {
+        Page<Project> page = projectRepository.findAllByDeletedAtIsNull(pageable);
+        return new PaginatedResponse<>(page.map(ProjectResponse::new));
     }
 
     @Transactional(readOnly = true)
     /**
      * Fetches a list of all projects that have been soft-deleted (archived).
      */
-    public List<ProjectResponse> getDeletedProjects() {
-        return projectRepository.findAllByDeletedAtIsNotNull().stream()
-                .map(ProjectResponse::new)
-                .collect(Collectors.toList());
+    public PaginatedResponse<ProjectResponse> getDeletedProjects(Pageable pageable) {
+        Page<Project> page = projectRepository.findAllByDeletedAtIsNotNull(pageable);
+        return new PaginatedResponse<>(page.map(ProjectResponse::new));
     }
 
     @Transactional(readOnly = true)
@@ -71,8 +73,10 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Owner user not found"));
 
         Project project = new Project();
-        project.setName(request.getName());
-        project.setDescription(request.getDescription());
+        project.setName(HtmlUtils.htmlEscape(request.getName()));
+        if (request.getDescription() != null) {
+            project.setDescription(HtmlUtils.htmlEscape(request.getDescription()));
+        }
         project.setOwner(owner);
 
         Project saved = projectRepository.save(project);
@@ -93,11 +97,11 @@ public class ProjectService {
 
         boolean updated = false;
         if (request.getName() != null) {
-            project.setName(request.getName());
+            project.setName(HtmlUtils.htmlEscape(request.getName()));
             updated = true;
         }
         if (request.getDescription() != null) {
-            project.setDescription(request.getDescription());
+            project.setDescription(HtmlUtils.htmlEscape(request.getDescription()));
             updated = true;
         }
 

@@ -24,7 +24,7 @@ class UserControllerTest extends BaseIntegrationTest {
                                 "username", "alice",
                                 "email", "alice@example.com",
                                 "fullName", "Alice Smith",
-                                "role", "DEVELOPER"
+                                "password", "password123"
                         ))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -60,7 +60,7 @@ class UserControllerTest extends BaseIntegrationTest {
                                 "username", "alice",
                                 "email", "alice2@example.com",
                                 "fullName", "Alice 2",
-                                "role", "DEVELOPER"
+                                "password", "password123"
                         ))))
                 .andExpect(status().is4xxClientError());
     }
@@ -75,7 +75,7 @@ class UserControllerTest extends BaseIntegrationTest {
                                 "username", "alice2",
                                 "email", "alice@example.com",
                                 "fullName", "Alice 2",
-                                "role", "DEVELOPER"
+                                "password", "password123"
                         ))))
                 .andExpect(status().is4xxClientError());
     }
@@ -88,7 +88,7 @@ class UserControllerTest extends BaseIntegrationTest {
                                 "username", "alice",
                                 "email", "not-an-email",
                                 "fullName", "Alice",
-                                "role", "DEVELOPER"
+                                "password", "password123"
                         ))))
                 .andExpect(status().isBadRequest());
     }
@@ -100,7 +100,7 @@ class UserControllerTest extends BaseIntegrationTest {
                         .content(json(Map.of(
                                 "email", "alice@example.com",
                                 "fullName", "Alice",
-                                "role", "DEVELOPER"
+                                "password", "password123"
                         ))))
                 .andExpect(status().isBadRequest());
     }

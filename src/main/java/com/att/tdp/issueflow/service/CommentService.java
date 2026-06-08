@@ -17,6 +17,7 @@ import com.att.tdp.issueflow.dto.comment.MentionedUserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,12 +27,16 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.att.tdp.issueflow.dto.common.PaginatedResponse;
 
 @Service
 @RequiredArgsConstructor
 /**
  * Role: Service layer responsible for managing comments on tickets.
- * It provides operations to retrieve, create, update, and delete comments, automatically parsing and handling user "@" mentions.
+ * It provides operations to retrieve, create, update, and delete comments,
+ * automatically parsing and handling user "@" mentions.
  */
 public class CommentService {
 
@@ -43,28 +48,26 @@ public class CommentService {
     private final AuthService authService;
 
     @Transactional(readOnly = true)
-    /**
-     * Fetches all comments associated with a specific ticket in chronological order, including populated mention metadata.
-     */
-    public List<CommentResponse> getCommentsByTicket(Long ticketId) {
+    // Fetches all comments associated with a specific ticket in chronological
+    // order, including populated mention metadata.
+    public PaginatedResponse<CommentResponse> getCommentsByTicket(Long ticketId, Pageable pageable) {
         // Validation: Check if ticket exists
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
-        return commentRepository.findAllByTicketIdOrderByCreatedAtAsc(ticketId).stream()
-                .map(comment -> {
-                    List<MentionedUserDto> mentions = commentMentionRepository.findByCommentId(comment.getId()).stream()
-                            .map(cm -> new MentionedUserDto(cm.getUser().getId(), cm.getUser().getUsername(), cm.getUser().getFullName()))
-                            .collect(Collectors.toList());
-                    return new CommentResponse(comment, mentions);
-                })
-                .collect(Collectors.toList());
+        Page<Comment> page = commentRepository.findAllByTicketIdOrderByCreatedAtAsc(ticketId, pageable);
+        return new PaginatedResponse<>(page.map(comment -> {
+            List<MentionedUserDto> mentions = commentMentionRepository.findByCommentId(comment.getId()).stream()
+                    .map(cm -> new MentionedUserDto(cm.getUser().getId(), cm.getUser().getUsername(),
+                            cm.getUser().getFullName()))
+                    .collect(Collectors.toList());
+            return new CommentResponse(comment, mentions);
+        }));
     }
 
     @Transactional
-    /**
-     * Creates a new comment on a ticket, parses it for user mentions, and logs an audit trail.
-     */
+    // Creates a new comment on a ticket, parses it for user mentions, and logs an
+    // audit trail.
     public CommentResponse createComment(Long ticketId, CreateCommentRequest request) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -75,7 +78,7 @@ public class CommentService {
         Comment comment = new Comment();
         comment.setTicket(ticket);
         comment.setAuthor(author);
-        comment.setContent(request.getContent());
+        comment.setContent(HtmlUtils.htmlEscape(request.getContent()));
 
         Comment saved = commentRepository.save(comment);
 
@@ -88,9 +91,8 @@ public class CommentService {
     }
 
     @Transactional
-    /**
-     * Modifies the content of an existing comment, refreshes the parsed mentions, and records the update in the audit log.
-     */
+    // Modifies the content of an existing comment, refreshes the parsed mentions,
+    // and records the update in the audit log.
     public void updateComment(Long ticketId, Long commentId, UpdateCommentRequest request) {
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -102,10 +104,11 @@ public class CommentService {
             throw new IllegalArgumentException("Comment does not belong to this ticket");
         }
 
-        comment.setContent(request.getContent());
-        comment.setUpdatedAt(LocalDateTime.now());
-        
-        commentRepository.save(comment);
+        if (request.getContent() != null) {
+            comment.setContent(HtmlUtils.htmlEscape(request.getContent()));
+            comment.setUpdatedAt(LocalDateTime.now());
+            commentRepository.save(comment);
+        }
 
         processMentions(comment, request.getContent());
 
@@ -113,9 +116,8 @@ public class CommentService {
     }
 
     @Transactional
-    /**
-     * Removes a comment and its associated mentions from the database, leaving an audit log of the deletion.
-     */
+    // Removes a comment and its associated mentions from the database, leaving an
+    // audit log of the deletion.
     public void deleteComment(Long ticketId, Long commentId) {
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -133,9 +135,8 @@ public class CommentService {
         auditLogService.log(AuditAction.DELETE, "Comment", commentId, getCurrentUserId(), "USER");
     }
 
-    /**
-     * Helper method to extract the ID of the currently authenticated user from the security context.
-     */
+    // Helper method to extract the ID of the currently authenticated user from the
+    // security context.
     private Long getCurrentUserId() {
         try {
             return authService.getCurrentUser().getId();
@@ -144,12 +145,11 @@ public class CommentService {
         }
     }
 
-    /**
-     * Parses the comment body for "@username" patterns, looks up the corresponding users, and links them as mentions.
-     */
+    // Parses the comment body for "@username" patterns, looks up the corresponding
+    // users, and links them as mentions.
     private List<MentionedUserDto> processMentions(Comment comment, String content) {
         commentMentionRepository.deleteByCommentId(comment.getId());
-        
+
         List<MentionedUserDto> mentionedUsers = new ArrayList<>();
         if (content == null || content.isEmpty()) {
             return mentionedUsers;

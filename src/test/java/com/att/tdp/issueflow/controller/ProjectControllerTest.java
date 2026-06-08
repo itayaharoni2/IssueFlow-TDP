@@ -66,8 +66,8 @@ class ProjectControllerTest extends BaseIntegrationTest {
         mockMvc.perform(get("/projects")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].name", hasItem("Active")))
-                .andExpect(jsonPath("$[*].name", not(hasItem("Deleted"))));
+                .andExpect(jsonPath("$.content[*].name", hasItem("Active")))
+                .andExpect(jsonPath("$.content[*].name", not(hasItem("Deleted"))));
     }
 
     @Test
@@ -125,7 +125,7 @@ class ProjectControllerTest extends BaseIntegrationTest {
         // Should no longer appear in regular list
         mockMvc.perform(get("/projects")
                         .header("Authorization", "Bearer " + token))
-                .andExpect(jsonPath("$[*].name", not(hasItem("ToDelete"))));
+                .andExpect(jsonPath("$.content[*].name", not(hasItem("ToDelete"))));
     }
 
     @Test
@@ -151,7 +151,7 @@ class ProjectControllerTest extends BaseIntegrationTest {
         mockMvc.perform(get("/projects/deleted")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].name", hasItem("Ghost")));
+                .andExpect(jsonPath("$.content[*].name", hasItem("Ghost")));
     }
 
     @Test
@@ -180,7 +180,7 @@ class ProjectControllerTest extends BaseIntegrationTest {
 
         mockMvc.perform(get("/projects")
                         .header("Authorization", "Bearer " + token))
-                .andExpect(jsonPath("$[*].name", hasItem("Restored")));
+                .andExpect(jsonPath("$.content[*].name", hasItem("Restored")));
     }
 
     @Test

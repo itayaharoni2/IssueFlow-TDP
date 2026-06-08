@@ -14,12 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.web.util.HtmlUtils;
 
 @Service
 @RequiredArgsConstructor
 /**
  * Role: Service layer responsible for managing user accounts.
- * It handles the creation of users, securely encoding passwords, updating roles/profiles, and managing user deletions.
+ * It handles the creation of users, securely encoding passwords, updating
+ * roles/profiles, and managing user deletions.
  */
 public class UserService {
 
@@ -29,9 +31,7 @@ public class UserService {
     private final AuthService authService;
 
     @Transactional(readOnly = true)
-    /**
-     * Retrieves a list of all registered users in the system.
-     */
+    // Retrieves a list of all registered users in the system.
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(UserResponse::new)
@@ -39,9 +39,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    /**
-     * Retrieves the specific profile details for a user by their unique identifier.
-     */
+    // Retrieves the specific profile details for a user by their unique identifier.
     public UserResponse getUserById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -49,9 +47,8 @@ public class UserService {
     }
 
     @Transactional
-    /**
-     * Registers a new user, ensuring username and email uniqueness, and securely hashing their password.
-     */
+    // Registers a new user, ensuring username and email uniqueness, and securely
+    // hashing their password.
     public UserResponse createUser(CreateUserRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
@@ -61,15 +58,12 @@ public class UserService {
         }
 
         User user = new User();
-        user.setUsername(request.getUsername());
+        user.setUsername(HtmlUtils.htmlEscape(request.getUsername()));
         user.setEmail(request.getEmail());
-        user.setFullName(request.getFullName());
-        user.setRole(request.getRole());
+        user.setFullName(HtmlUtils.htmlEscape(request.getFullName()));
+        user.setRole(com.att.tdp.issueflow.entity.enums.Role.DEVELOPER);
 
-        String rawPassword = request.getPassword() != null && !request.getPassword().isEmpty()
-                ? request.getPassword()
-                : "secret";
-        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         User saved = userRepository.save(user);
         auditLogService.log(AuditAction.CREATE, "User", saved.getId(), saved.getId(), "USER");
@@ -77,19 +71,29 @@ public class UserService {
     }
 
     @Transactional
-    /**
-     * Applies partial updates to a user's profile or security role.
-     */
+    // Applies partial updates to a user's profile or security role.
     public void updateUser(Long userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         boolean updated = false;
         if (request.getFullName() != null) {
-            user.setFullName(request.getFullName());
+            user.setFullName(HtmlUtils.htmlEscape(request.getFullName()));
             updated = true;
         }
         if (request.getRole() != null) {
+            // Prevent self-demotion: an admin cannot demote themselves
+            Long currentUserId = null;
+            try {
+                if (authService.getCurrentUser() != null) {
+                    currentUserId = authService.getCurrentUser().getId();
+                }
+            } catch (Exception ignored) {}
+            if (currentUserId != null && currentUserId.equals(userId)
+                    && user.getRole() == com.att.tdp.issueflow.entity.enums.Role.ADMIN
+                    && request.getRole() != com.att.tdp.issueflow.entity.enums.Role.ADMIN) {
+                throw new com.att.tdp.issueflow.exception.BadRequestException("Admins cannot demote themselves.");
+            }
             user.setRole(request.getRole());
             updated = true;
         }
@@ -98,7 +102,9 @@ public class UserService {
             userRepository.save(user);
             User currentUser = null;
             try {
-                currentUser = authService.getCurrentUser() != null ? userRepository.findById(authService.getCurrentUser().getId()).orElse(null) : null;
+                currentUser = authService.getCurrentUser() != null
+                        ? userRepository.findById(authService.getCurrentUser().getId()).orElse(null)
+                        : null;
             } catch (Exception e) {
                 // Ignore if called without auth context in theory
             }
@@ -108,20 +114,19 @@ public class UserService {
     }
 
     @Transactional
-    /**
-     * Permanently deletes a user from the system and logs the action.
-     */
+    // Permanently deletes a user from the system and logs the action.
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
+
         userRepository.delete(user);
-        
+
         Long currentUserId = null;
         try {
             currentUserId = authService.getCurrentUser().getId();
-        } catch (Exception e) {}
-        
+        } catch (Exception e) {
+        }
+
         auditLogService.log(AuditAction.DELETE, "User", userId, currentUserId, "USER");
     }
 }

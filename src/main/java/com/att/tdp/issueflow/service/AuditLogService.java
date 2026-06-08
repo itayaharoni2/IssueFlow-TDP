@@ -7,6 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import com.att.tdp.issueflow.dto.common.PaginatedResponse;
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,15 +43,25 @@ public class AuditLogService {
      * Retrieves and filters audit logs based on the provided parameters, mapping them to response DTOs.
      */
     @Transactional(readOnly = true)
-    public java.util.List<com.att.tdp.issueflow.dto.audit.AuditLogResponse> getLogs(String entityType, Long entityId, AuditAction action, String actor) {
-        // For Phase 3, we just return all logs or do simple filtering
-        // We'll use simple stream filtering for now, Specification can be used later
-        return auditLogRepository.findAll().stream()
-                .filter(log -> entityType == null || entityType.equals(log.getEntityType()))
-                .filter(log -> entityId == null || entityId.equals(log.getEntityId()))
-                .filter(log -> action == null || action.equals(log.getAction()))
-                .filter(log -> actor == null || actor.equals(log.getActor()))
-                .map(com.att.tdp.issueflow.dto.audit.AuditLogResponse::new)
-                .collect(java.util.stream.Collectors.toList());
+    public PaginatedResponse<com.att.tdp.issueflow.dto.audit.AuditLogResponse> getLogs(String entityType, Long entityId, AuditAction action, String actor, Pageable pageable) {
+        Specification<AuditLog> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (entityType != null) {
+                predicates.add(cb.equal(root.get("entityType"), entityType));
+            }
+            if (entityId != null) {
+                predicates.add(cb.equal(root.get("entityId"), entityId));
+            }
+            if (action != null) {
+                predicates.add(cb.equal(root.get("action"), action));
+            }
+            if (actor != null) {
+                predicates.add(cb.equal(root.get("actor"), actor));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<AuditLog> page = auditLogRepository.findAll(spec, pageable);
+        return new PaginatedResponse<>(page.map(com.att.tdp.issueflow.dto.audit.AuditLogResponse::new));
     }
 }

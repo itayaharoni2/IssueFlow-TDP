@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "app.escalation.interval",
+      "type": "java.lang.String",
+      "description": "The interval in milliseconds for the escalation scheduler to run."
+    }
+  ]
+}

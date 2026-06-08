@@ -36,6 +36,10 @@ public class AttachmentService {
             "image/png", "image/jpeg", "application/pdf", "text/plain"
     );
 
+    private static final List<String> BLOCKED_EXTENSIONS = List.of(
+            ".exe", ".sh", ".bat", ".cmd", ".ps1", ".jar", ".war", ".msi", ".com", ".vbs", ".js"
+    );
+
     @Transactional
     /**
      * Validates and saves an uploaded file as an attachment to the specified ticket, generating an audit log.
@@ -57,7 +61,7 @@ public class AttachmentService {
 
         Attachment attachment = new Attachment();
         attachment.setTicket(ticket);
-        attachment.setFilename(file.getOriginalFilename());
+        attachment.setFilename(sanitizeFilename(file.getOriginalFilename()));
         attachment.setContentType(contentType);
         attachment.setUploadedBy(uploader);
         try {
@@ -114,5 +118,34 @@ public class AttachmentService {
             throw new RuntimeException("No authenticated user");
         }
         return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    /**
+     * Sanitizes the filename by removing path traversal characters and checking for dangerous extensions.
+     */
+    private String sanitizeFilename(String filename) {
+        if (filename == null || filename.isEmpty()) {
+            throw new com.att.tdp.issueflow.exception.BadRequestException("Filename cannot be empty");
+        }
+
+        // Prevent path traversal
+        if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
+            throw new com.att.tdp.issueflow.exception.BadRequestException("Filename contains invalid characters (path traversal)");
+        }
+
+        // Check length
+        if (filename.length() > 255) {
+            throw new com.att.tdp.issueflow.exception.BadRequestException("Filename is too long (max 255 chars)");
+        }
+
+        // Check for blocked extensions
+        String lowerCaseFilename = filename.toLowerCase();
+        for (String ext : BLOCKED_EXTENSIONS) {
+            if (lowerCaseFilename.endsWith(ext)) {
+                throw new com.att.tdp.issueflow.exception.BadRequestException("File extension is not allowed for security reasons");
+            }
+        }
+
+        return filename;
     }
 }

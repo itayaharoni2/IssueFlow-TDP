@@ -4,10 +4,14 @@ import com.att.tdp.issueflow.dto.ticket.CreateTicketRequest;
 import com.att.tdp.issueflow.dto.ticket.ImportResultResponse;
 import com.att.tdp.issueflow.dto.ticket.TicketResponse;
 import com.att.tdp.issueflow.dto.ticket.UpdateTicketRequest;
+import com.att.tdp.issueflow.dto.common.PaginatedResponse;
 import com.att.tdp.issueflow.service.TicketService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.HttpHeaders;
@@ -29,19 +33,24 @@ public class TicketController {
 
     private final TicketService ticketService;
 
-    @GetMapping
-    // Retrieves all active tickets associated with a specific project.
-    public ResponseEntity<List<TicketResponse>> getTicketsByProject(@RequestParam Long projectId) {
-        return ResponseEntity.ok(ticketService.getActiveTickets(projectId));
+    @GetMapping("/project/{projectId}")
+    // Retrieves a list of all active tickets associated with a specific project.
+    public ResponseEntity<PaginatedResponse<TicketResponse>> getTicketsByProject(
+            @PathVariable Long projectId,
+            @RequestParam(defaultValue = "1") @Min(1) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+        return ResponseEntity.ok(ticketService.getActiveTickets(projectId, PageRequest.of(page - 1, size)));
     }
 
-    // Must be mapped before /{ticketId} to avoid collision
-    @GetMapping("/deleted")
+    @GetMapping("/project/{projectId}/deleted")
     @PreAuthorize("hasRole('ADMIN')")
-    // Retrieves all soft-deleted tickets for a specific project. Requires ADMIN
+    // Retrieves a list of all soft-deleted tickets for a specific project. Requires ADMIN
     // privileges.
-    public ResponseEntity<List<TicketResponse>> getDeletedTickets(@RequestParam Long projectId) {
-        return ResponseEntity.ok(ticketService.getDeletedTickets(projectId));
+    public ResponseEntity<PaginatedResponse<TicketResponse>> getDeletedTickets(
+            @PathVariable Long projectId,
+            @RequestParam(defaultValue = "1") @Min(1) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+        return ResponseEntity.ok(ticketService.getDeletedTickets(projectId, PageRequest.of(page - 1, size)));
     }
 
     // Export tickets to CSV

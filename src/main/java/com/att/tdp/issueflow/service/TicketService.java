@@ -23,6 +23,7 @@ import com.att.tdp.issueflow.dto.ticket.ImportResultResponse;
 import com.att.tdp.issueflow.entity.enums.TicketStatus;
 import com.att.tdp.issueflow.entity.enums.TicketPriority;
 import com.att.tdp.issueflow.entity.enums.TicketType;
+import org.springframework.web.util.HtmlUtils;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -31,12 +32,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.att.tdp.issueflow.dto.common.PaginatedResponse;
 
 @Service
 @RequiredArgsConstructor
 /**
  * Role: Service layer managing the core entity of the system: Tickets.
- * It provides operations for standard CRUD, status transitions, workload-based auto-assignment, and CSV import/export.
+ * It provides operations for standard CRUD, status transitions, workload-based
+ * auto-assignment, and CSV import/export.
  */
 public class TicketService {
 
@@ -48,29 +53,21 @@ public class TicketService {
     private final AuthService authService;
 
     @Transactional(readOnly = true)
-    /**
-     * Retrieves all active (non-deleted) tickets for a specific project.
-     */
-    public List<TicketResponse> getActiveTickets(Long projectId) {
-        return ticketRepository.findAllByProjectIdAndDeletedAtIsNull(projectId).stream()
-                .map(TicketResponse::new)
-                .collect(Collectors.toList());
+    // Retrieves all active (non-deleted) tickets for a specific project.
+    public PaginatedResponse<TicketResponse> getActiveTickets(Long projectId, Pageable pageable) {
+        Page<Ticket> page = ticketRepository.findAllByProjectIdAndDeletedAtIsNull(projectId, pageable);
+        return new PaginatedResponse<>(page.map(TicketResponse::new));
     }
 
     @Transactional(readOnly = true)
-    /**
-     * Retrieves all soft-deleted tickets for a specific project.
-     */
-    public List<TicketResponse> getDeletedTickets(Long projectId) {
-        return ticketRepository.findAllByProjectIdAndDeletedAtIsNotNull(projectId).stream()
-                .map(TicketResponse::new)
-                .collect(Collectors.toList());
+    // Retrieves all soft-deleted tickets for a specific project.
+    public PaginatedResponse<TicketResponse> getDeletedTickets(Long projectId, Pageable pageable) {
+        Page<Ticket> page = ticketRepository.findAllByProjectIdAndDeletedAtIsNotNull(projectId, pageable);
+        return new PaginatedResponse<>(page.map(TicketResponse::new));
     }
 
     @Transactional(readOnly = true)
-    /**
-     * Retrieves a specific ticket by its ID, ensuring it has not been soft-deleted.
-     */
+    // Retrieves a specific ticket by its ID, ensuring it has not been soft-deleted.
     public TicketResponse getTicketById(Long ticketId) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -78,9 +75,8 @@ public class TicketService {
     }
 
     @Transactional
-    /**
-     * Creates a new ticket, optionally auto-assigning it based on current developer workloads, and records an audit log.
-     */
+    // Creates a new ticket, optionally auto-assigning it based on current developer
+    // workloads, and records an audit log.
     public TicketResponse createTicket(CreateTicketRequest request) {
         Project project = projectRepository.findByIdAndDeletedAtIsNull(request.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -102,8 +98,10 @@ public class TicketService {
             if (!developers.isEmpty()) {
                 assignee = developers.stream()
                         .min((u1, u2) -> {
-                            long w1 = ticketRepository.countByProjectIdAndAssigneeIdAndStatusNotAndDeletedAtIsNull(project.getId(), u1.getId(), com.att.tdp.issueflow.entity.enums.TicketStatus.DONE);
-                            long w2 = ticketRepository.countByProjectIdAndAssigneeIdAndStatusNotAndDeletedAtIsNull(project.getId(), u2.getId(), com.att.tdp.issueflow.entity.enums.TicketStatus.DONE);
+                            long w1 = ticketRepository.countByProjectIdAndAssigneeIdAndStatusNotAndDeletedAtIsNull(
+                                    project.getId(), u1.getId(), com.att.tdp.issueflow.entity.enums.TicketStatus.DONE);
+                            long w2 = ticketRepository.countByProjectIdAndAssigneeIdAndStatusNotAndDeletedAtIsNull(
+                                    project.getId(), u2.getId(), com.att.tdp.issueflow.entity.enums.TicketStatus.DONE);
                             if (w1 != w2) {
                                 return Long.compare(w1, w2);
                             }
@@ -114,18 +112,20 @@ public class TicketService {
         }
 
         Ticket ticket = new Ticket();
-        ticket.setTitle(request.getTitle());
-        ticket.setDescription(request.getDescription());
+        ticket.setProject(project);
+        ticket.setTitle(HtmlUtils.htmlEscape(request.getTitle()));
+        if (request.getDescription() != null) {
+            ticket.setDescription(HtmlUtils.htmlEscape(request.getDescription()));
+        }
         ticket.setStatus(request.getStatus());
         ticket.setPriority(request.getPriority());
         ticket.setType(request.getType());
-        ticket.setProject(project);
         ticket.setReporter(reporter);
         ticket.setAssignee(assignee);
         ticket.setDueDate(request.getDueDate());
 
         Ticket saved = ticketRepository.save(ticket);
-        
+
         Long currentUserId = getCurrentUserId();
         auditLogService.log(AuditAction.CREATE, "Ticket", saved.getId(), currentUserId, "USER");
 
@@ -137,25 +137,25 @@ public class TicketService {
     }
 
     @Transactional
-    /**
-     * Updates an existing ticket, validating allowed status transitions and dependencies before saving changes.
-     */
+    // Updates an existing ticket, validating allowed status transitions and
+    // dependencies before saving changes.
     public void updateTicket(Long ticketId, UpdateTicketRequest request) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
         if (com.att.tdp.issueflow.entity.enums.TicketStatus.DONE.equals(ticket.getStatus())) {
-            throw new com.att.tdp.issueflow.exception.BadRequestException("Cannot update a ticket that is already DONE.");
+            throw new com.att.tdp.issueflow.exception.BadRequestException(
+                    "Cannot update a ticket that is already DONE.");
         }
 
         boolean updated = false;
 
         if (request.getTitle() != null) {
-            ticket.setTitle(request.getTitle());
+            ticket.setTitle(HtmlUtils.htmlEscape(request.getTitle()));
             updated = true;
         }
         if (request.getDescription() != null) {
-            ticket.setDescription(request.getDescription());
+            ticket.setDescription(HtmlUtils.htmlEscape(request.getDescription()));
             updated = true;
         }
         if (request.getStatus() != null && !request.getStatus().equals(ticket.getStatus())) {
@@ -186,23 +186,20 @@ public class TicketService {
     }
 
     @Transactional
-    /**
-     * Soft-deletes a ticket by stamping a deletion timestamp, hiding it from active views.
-     */
+    // Soft-deletes a ticket by stamping a deletion timestamp, hiding it from active
+    // views.
     public void softDeleteTicket(Long ticketId) {
         Ticket ticket = ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
         ticket.setDeletedAt(LocalDateTime.now());
         ticketRepository.save(ticket);
-        
+
         auditLogService.log(AuditAction.DELETE, "Ticket", ticket.getId(), getCurrentUserId(), "USER");
     }
 
     @Transactional
-    /**
-     * Restores a soft-deleted ticket by clearing its deletion timestamp.
-     */
+    // Restores a soft-deleted ticket by clearing its deletion timestamp.
     public void restoreTicket(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -214,12 +211,12 @@ public class TicketService {
         }
     }
 
-    /**
-     * Exports all active tickets in a project to a CSV format and writes them to the provided Writer.
-     */
+    // Exports all active tickets in a project to a CSV format and writes them to
+    // the provided Writer.
     public void exportTicketsToCsv(Long projectId, Writer writer) {
-        List<Ticket> tickets = ticketRepository.findAllByProjectIdAndDeletedAtIsNull(projectId);
-        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setHeader("id", "title", "description", "status", "priority", "type", "assigneeId").build())) {
+        List<Ticket> tickets = ticketRepository.findAllByProjectIdAndDeletedAtIsNull(projectId, Pageable.unpaged()).getContent();
+        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder()
+                .setHeader("id", "title", "description", "status", "priority", "type", "assigneeId").build())) {
             for (Ticket ticket : tickets) {
                 csvPrinter.printRecord(
                         ticket.getId(),
@@ -228,8 +225,7 @@ public class TicketService {
                         ticket.getStatus(),
                         ticket.getPriority(),
                         ticket.getType(),
-                        ticket.getAssignee() != null ? ticket.getAssignee().getId() : null
-                );
+                        ticket.getAssignee() != null ? ticket.getAssignee().getId() : null);
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to write CSV data", e);
@@ -237,9 +233,8 @@ public class TicketService {
     }
 
     @Transactional
-    /**
-     * Imports multiple tickets from a provided CSV file, returning a summary of successful and failed row imports.
-     */
+    // Imports multiple tickets from a provided CSV file, returning a summary of
+    // successful and failed row imports.
     public ImportResultResponse importTicketsFromCsv(Long projectId, MultipartFile file) {
         Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -249,7 +244,8 @@ public class TicketService {
         List<String> errors = new ArrayList<>();
 
         try (Reader reader = new InputStreamReader(file.getInputStream());
-             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).setIgnoreHeaderCase(true).setTrim(true).build())) {
+                CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder().setHeader()
+                        .setSkipHeaderRecord(true).setIgnoreHeaderCase(true).setTrim(true).build())) {
 
             for (CSVRecord csvRecord : csvParser) {
                 try {
@@ -265,15 +261,18 @@ public class TicketService {
                     if (assigneeIdStr != null && !assigneeIdStr.isEmpty()) {
                         Long assigneeId = Long.parseLong(assigneeIdStr);
                         User assignee = userRepository.findById(assigneeId)
-                                .orElseThrow(() -> new ResourceNotFoundException("Assignee not found for ID: " + assigneeId));
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                        "Assignee not found for ID: " + assigneeId));
                         ticket.setAssignee(assignee);
                     }
 
-                    // For reporter, if not provided, we can set current user or null. Rules say "assigneeId", no reporter specified for CSV.
+                    // For reporter, if not provided, we can set current user or null. Rules say
+                    // "assigneeId", no reporter specified for CSV.
                     User reporter = null;
                     try {
                         reporter = userRepository.findById(authService.getCurrentUser().getId()).orElse(null);
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                     ticket.setReporter(reporter);
 
                     Ticket saved = ticketRepository.save(ticket);
@@ -291,9 +290,8 @@ public class TicketService {
         return new ImportResultResponse(created, failed, errors);
     }
 
-    /**
-     * Helper method to extract the ID of the currently authenticated user from the security context.
-     */
+    // Helper method to extract the ID of the currently authenticated user from the
+    // security context.
     private Long getCurrentUserId() {
         try {
             return authService.getCurrentUser().getId();
@@ -302,25 +300,33 @@ public class TicketService {
         }
     }
 
-    /**
-     * Enforces the forward-only ticket lifecycle and prevents transitioning to DONE if blocking dependencies remain unresolved.
-     */
-    private void validateStatusTransition(com.att.tdp.issueflow.entity.enums.TicketStatus current, com.att.tdp.issueflow.entity.enums.TicketStatus next, Long ticketId) {
-        if (current == com.att.tdp.issueflow.entity.enums.TicketStatus.TODO && next != com.att.tdp.issueflow.entity.enums.TicketStatus.IN_PROGRESS) {
-            throw new com.att.tdp.issueflow.exception.BadRequestException("Invalid status transition from TODO. Next status must be IN_PROGRESS.");
+    // Enforces the forward-only ticket lifecycle and prevents transitioning to DONE
+    // if blocking dependencies remain unresolved.
+    private void validateStatusTransition(com.att.tdp.issueflow.entity.enums.TicketStatus current,
+            com.att.tdp.issueflow.entity.enums.TicketStatus next, Long ticketId) {
+        if (current == com.att.tdp.issueflow.entity.enums.TicketStatus.TODO
+                && next != com.att.tdp.issueflow.entity.enums.TicketStatus.IN_PROGRESS) {
+            throw new com.att.tdp.issueflow.exception.BadRequestException(
+                    "Invalid status transition from TODO. Next status must be IN_PROGRESS.");
         }
-        if (current == com.att.tdp.issueflow.entity.enums.TicketStatus.IN_PROGRESS && next != com.att.tdp.issueflow.entity.enums.TicketStatus.IN_REVIEW) {
-            throw new com.att.tdp.issueflow.exception.BadRequestException("Invalid status transition from IN_PROGRESS. Next status must be IN_REVIEW.");
+        if (current == com.att.tdp.issueflow.entity.enums.TicketStatus.IN_PROGRESS
+                && next != com.att.tdp.issueflow.entity.enums.TicketStatus.IN_REVIEW) {
+            throw new com.att.tdp.issueflow.exception.BadRequestException(
+                    "Invalid status transition from IN_PROGRESS. Next status must be IN_REVIEW.");
         }
-        if (current == com.att.tdp.issueflow.entity.enums.TicketStatus.IN_REVIEW && next != com.att.tdp.issueflow.entity.enums.TicketStatus.DONE) {
-            throw new com.att.tdp.issueflow.exception.BadRequestException("Invalid status transition from IN_REVIEW. Next status must be DONE.");
+        if (current == com.att.tdp.issueflow.entity.enums.TicketStatus.IN_REVIEW
+                && next != com.att.tdp.issueflow.entity.enums.TicketStatus.DONE) {
+            throw new com.att.tdp.issueflow.exception.BadRequestException(
+                    "Invalid status transition from IN_REVIEW. Next status must be DONE.");
         }
 
         if (next == com.att.tdp.issueflow.entity.enums.TicketStatus.DONE) {
             boolean hasUnresolvedBlockers = ticketDependencyRepository.findAllByTicketId(ticketId).stream()
-                    .anyMatch(dep -> !com.att.tdp.issueflow.entity.enums.TicketStatus.DONE.equals(dep.getBlockedBy().getStatus()));
+                    .anyMatch(dep -> !com.att.tdp.issueflow.entity.enums.TicketStatus.DONE
+                            .equals(dep.getBlockedBy().getStatus()));
             if (hasUnresolvedBlockers) {
-                throw new com.att.tdp.issueflow.exception.BadRequestException("Cannot transition to DONE: Ticket has unresolved blocking dependencies.");
+                throw new com.att.tdp.issueflow.exception.BadRequestException(
+                        "Cannot transition to DONE: Ticket has unresolved blocking dependencies.");
             }
         }
     }

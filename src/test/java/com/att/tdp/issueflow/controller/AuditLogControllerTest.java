@@ -133,7 +133,7 @@ class AuditLogControllerTest extends BaseIntegrationTest {
         mockMvc.perform(get("/audit-logs")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(greaterThan(0))));
+                .andExpect(jsonPath("$.content", hasSize(greaterThan(0))));
     }
 
     @Test
@@ -146,7 +146,7 @@ class AuditLogControllerTest extends BaseIntegrationTest {
         mockMvc.perform(get("/audit-logs?entityType=Ticket")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].entityType", everyItem(is("Ticket"))));
+                .andExpect(jsonPath("$.content[*].entityType", everyItem(is("Ticket"))));
     }
 
     @Test
@@ -161,6 +161,6 @@ class AuditLogControllerTest extends BaseIntegrationTest {
         mockMvc.perform(get("/audit-logs?actor=SYSTEM")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].actor", everyItem(is("SYSTEM"))));
+                .andExpect(jsonPath("$.content[*].actor", everyItem(is("SYSTEM"))));
     }
 }

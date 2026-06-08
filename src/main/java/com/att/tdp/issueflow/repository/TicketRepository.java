@@ -4,6 +4,8 @@ import com.att.tdp.issueflow.entity.Ticket;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,12 +19,12 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     /**
      * Retrieves all active (non-deleted) tickets associated with a specific project.
      */
-    List<Ticket> findAllByProjectIdAndDeletedAtIsNull(Long projectId);
+    Page<Ticket> findAllByProjectIdAndDeletedAtIsNull(Long projectId, Pageable pageable);
 
     /**
      * Retrieves all soft-deleted tickets associated with a specific project.
      */
-    List<Ticket> findAllByProjectIdAndDeletedAtIsNotNull(Long projectId);
+    Page<Ticket> findAllByProjectIdAndDeletedAtIsNotNull(Long projectId, Pageable pageable);
 
     /**
      * Retrieves a specific ticket by its ID, ensuring it has not been soft-deleted.
