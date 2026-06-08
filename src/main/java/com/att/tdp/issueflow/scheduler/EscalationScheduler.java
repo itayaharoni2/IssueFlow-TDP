@@ -17,7 +17,7 @@ public class EscalationScheduler {
 
     // Run every minute for testing/demonstration purposes
     // Depending on rules.md, adjust cron as necessary (e.g., hourly, daily)
-    @Scheduled(fixedRateString = "${app.escalation.interval:60000}")
+    @Scheduled(fixedDelayString = "${app.escalation.interval:60000}")
     /**
      * Scheduled task that executes at a configurable interval to find and escalate overdue tickets.
      */

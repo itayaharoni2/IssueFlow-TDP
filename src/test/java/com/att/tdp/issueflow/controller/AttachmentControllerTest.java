@@ -186,4 +186,36 @@ class AttachmentControllerTest extends BaseIntegrationTest {
                 // Response should only contain metadata, not the file binary
                 .andExpect(jsonPath("$.data").doesNotExist());
     }
+
+    @Test
+    void uploadExecutableSpoofedAsText_returns400() throws Exception {
+        User admin = createAdmin();
+        String token = loginAndGetToken("admin", "secret");
+        Project project = createProject(admin, "P1");
+        Ticket ticket = createTicket(project, admin, null);
+
+        MockMultipartFile file = new MockMultipartFile("file", "malware.exe",
+                "text/plain", smallContent());
+
+        mockMvc.perform(multipart("/tickets/" + ticket.getId() + "/attachments")
+                        .file(file)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void uploadScriptSpoofedAsImage_returns400() throws Exception {
+        User admin = createAdmin();
+        String token = loginAndGetToken("admin", "secret");
+        Project project = createProject(admin, "P1");
+        Ticket ticket = createTicket(project, admin, null);
+
+        MockMultipartFile file = new MockMultipartFile("file", "script.sh",
+                "image/png", smallContent());
+
+        mockMvc.perform(multipart("/tickets/" + ticket.getId() + "/attachments")
+                        .file(file)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest());
+    }
 }

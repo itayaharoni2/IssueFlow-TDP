@@ -249,4 +249,69 @@ class CommentControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.total", is(1)))
                 .andExpect(jsonPath("$.data", hasSize(1)));
     }
+
+    @Test
+    void comment_mentionWithPunctuation_matchesCorrectly() throws Exception {
+        User admin = createAdmin();
+        createDeveloper("dev1");
+        String token = loginAndGetToken("admin", "secret");
+        Project project = createProject(admin, "P1");
+        Ticket ticket = createTicket(project, admin, null);
+
+        mockMvc.perform(post("/tickets/" + ticket.getId() + "/comments")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of("authorId", admin.getId(), "content", "Hello @dev1, please check this. @dev1!"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mentionedUsers", hasSize(1)))
+                .andExpect(jsonPath("$.mentionedUsers[0].username", is("dev1")));
+    }
+
+    @Test
+    void comment_mentionMultipleDifferentUsers_matchesAll() throws Exception {
+        User admin = createAdmin();
+        createDeveloper("dev1");
+        createDeveloper("dev2");
+        String token = loginAndGetToken("admin", "secret");
+        Project project = createProject(admin, "P1");
+        Ticket ticket = createTicket(project, admin, null);
+
+        mockMvc.perform(post("/tickets/" + ticket.getId() + "/comments")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of("authorId", admin.getId(), "content", "Hey @dev1 and @dev2"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mentionedUsers", hasSize(2)));
+    }
+
+    @Test
+    void comment_mentionEmailAddress_isIgnored() throws Exception {
+        User admin = createAdmin();
+        String token = loginAndGetToken("admin", "secret");
+        Project project = createProject(admin, "P1");
+        Ticket ticket = createTicket(project, admin, null);
+
+        mockMvc.perform(post("/tickets/" + ticket.getId() + "/comments")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of("authorId", admin.getId(), "content", "Contact me at test@admin.com"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mentionedUsers", is(empty())));
+    }
+
+    @Test
+    void comment_mentionSameUserMultipleTimes_onlyOneMetadataEntry() throws Exception {
+        User admin = createAdmin();
+        createDeveloper("dev1");
+        String token = loginAndGetToken("admin", "secret");
+        Project project = createProject(admin, "P1");
+        Ticket ticket = createTicket(project, admin, null);
+
+        mockMvc.perform(post("/tickets/" + ticket.getId() + "/comments")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of("authorId", admin.getId(), "content", "Hey @dev1 did you see what @dev1 said?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mentionedUsers", hasSize(1)));
+    }
 }

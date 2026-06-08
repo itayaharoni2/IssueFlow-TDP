@@ -312,4 +312,30 @@ class TicketLifecycleTest extends BaseIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void concurrentUpdate_throwsOptimisticLockingFailureException() throws Exception {
+        User admin = createAdmin();
+        Project p = createProject(admin, "P1");
+        Ticket ticket = createTicket(p, admin, null);
+
+        // Simulate Thread A loading the ticket
+        Ticket threadATicket = ticketRepository.findById(ticket.getId()).orElseThrow();
+        
+        // Simulate Thread B loading the exact same ticket
+        Ticket threadBTicket = ticketRepository.findById(ticket.getId()).orElseThrow();
+
+        // Thread A makes an update and successfully saves
+        threadATicket.setTitle("Title updated by Thread A");
+        ticketRepository.saveAndFlush(threadATicket);
+
+        // Thread B makes an update and attempts to save its stale copy (simulating a concurrent race)
+        threadBTicket.setTitle("Title updated by Thread B");
+        
+        // Should throw optimistic locking failure because Thread B's version is now out of date
+        org.junit.jupiter.api.Assertions.assertThrows(
+                org.springframework.orm.ObjectOptimisticLockingFailureException.class, 
+                () -> ticketRepository.saveAndFlush(threadBTicket)
+        );
+    }
 }

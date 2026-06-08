@@ -181,4 +181,70 @@ class CsvExportImportTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.created", is(1)))
                 .andExpect(jsonPath("$.failed", is(0)));
     }
+
+    @Test
+    void import_csvWithMissingRequiredColumn_returns200WithFailures() throws Exception {
+        User admin = createAdmin();
+        String token = loginAndGetToken("admin", "secret");
+        Project project = createProject(admin, "P1");
+
+        // Missing the "status" column completely
+        String csvContent = "title,description,priority,type,assigneeId\n" +
+                "Ticket One,First desc,LOW,BUG,\n";
+
+        MockMultipartFile file = new MockMultipartFile("file", "tickets.csv",
+                "text/csv", csvContent.getBytes());
+
+        mockMvc.perform(multipart("/tickets/import")
+                        .file(file)
+                        .param("projectId", project.getId().toString())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.created", is(0)))
+                .andExpect(jsonPath("$.failed", is(1)));
+    }
+
+    @Test
+    void import_csvWithExtraColumn_ignoredSafely() throws Exception {
+        User admin = createAdmin();
+        String token = loginAndGetToken("admin", "secret");
+        Project project = createProject(admin, "P1");
+
+        // Has an unexpected extra column
+        String csvContent = "title,description,status,priority,type,assigneeId,extraColumn\n" +
+                "Ticket One,First desc,TODO,LOW,BUG,,superfluousData\n";
+
+        MockMultipartFile file = new MockMultipartFile("file", "tickets.csv",
+                "text/csv", csvContent.getBytes());
+
+        mockMvc.perform(multipart("/tickets/import")
+                        .file(file)
+                        .param("projectId", project.getId().toString())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.created", is(1)))
+                .andExpect(jsonPath("$.failed", is(0)));
+    }
+
+    @Test
+    void import_csvWithEmbeddedNewlinesInQuotes_handlesCorrectly() throws Exception {
+        User admin = createAdmin();
+        String token = loginAndGetToken("admin", "secret");
+        Project project = createProject(admin, "P1");
+
+        // Description spans multiple lines enclosed in quotes
+        String csvContent = "title,description,status,priority,type,assigneeId\n" +
+                "Ticket One,\"First line\nSecond line\",TODO,LOW,BUG,\n";
+
+        MockMultipartFile file = new MockMultipartFile("file", "tickets.csv",
+                "text/csv", csvContent.getBytes());
+
+        mockMvc.perform(multipart("/tickets/import")
+                        .file(file)
+                        .param("projectId", project.getId().toString())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.created", is(1)))
+                .andExpect(jsonPath("$.failed", is(0)));
+    }
 }

@@ -74,7 +74,6 @@ Full documentation in prompts.md file
 
 The `docs/` directory contains important project documentation:
 - `api-contract-checklist.md`: A detailed checklist mapping API requirements to code, tracking implementation status and gaps.
-- `implementation-decisions.md`: An Architecture Decision Record (ADR) explaining the *why* behind key design choices (e.g., soft deletes, password handling).
 - `rules.md`: Internal guidelines and rules used during the AI-assisted development process.
 - `system_inputs_restrictions.md`: A list of all system inputs and their security validation constraints.
 

@@ -214,19 +214,29 @@ public class TicketService {
     // Exports all active tickets in a project to a CSV format and writes them to
     // the provided Writer.
     public void exportTicketsToCsv(Long projectId, Writer writer) {
-        List<Ticket> tickets = ticketRepository.findAllByProjectIdAndDeletedAtIsNull(projectId, Pageable.unpaged()).getContent();
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder()
                 .setHeader("id", "title", "description", "status", "priority", "type", "assigneeId").build())) {
-            for (Ticket ticket : tickets) {
-                csvPrinter.printRecord(
-                        ticket.getId(),
-                        ticket.getTitle(),
-                        ticket.getDescription(),
-                        ticket.getStatus(),
-                        ticket.getPriority(),
-                        ticket.getType(),
-                        ticket.getAssignee() != null ? ticket.getAssignee().getId() : null);
-            }
+            
+            int pageNumber = 0;
+            int pageSize = 500;
+            Page<Ticket> ticketPage;
+            
+            do {
+                ticketPage = ticketRepository.findAllByProjectIdAndDeletedAtIsNull(projectId, org.springframework.data.domain.PageRequest.of(pageNumber, pageSize));
+                for (Ticket ticket : ticketPage.getContent()) {
+                    csvPrinter.printRecord(
+                            ticket.getId(),
+                            ticket.getTitle(),
+                            ticket.getDescription(),
+                            ticket.getStatus(),
+                            ticket.getPriority(),
+                            ticket.getType(),
+                            ticket.getAssignee() != null ? ticket.getAssignee().getId() : null);
+                }
+                csvPrinter.flush();
+                pageNumber++;
+            } while (ticketPage.hasNext());
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to write CSV data", e);
         }
