@@ -9,19 +9,19 @@ This document details the interaction with the AI assistant during the design an
 - (via Antigravity IDE)
 
 ## AI Usage Summary
-The AI was used to:
-1. Parse the assignment requirement documents and extract the API contract.
-2. Outline the layered package structure (`com.att.tdp.issueflow`).
-3. Formulate the implementation plan, test plan, and identify project ambiguities.
-4. Generate the boilerplate entities, repositories, services, controllers, and tests.
+
+1. AI tools were used as development assistants for requirement analysis, API contract extraction, implementation planning, test planning, and documentation review.
+2. All AI-generated suggestions were reviewed, adapted, and validated through compilation, manual testing, and automated tests.
 
 ## Key Prompts
-* **Prompt 1 (Analysis)**: *"read the project (do not change anything) and tell me what you understand from this structure that i need to implement"*
+* **Prompt 1 (Analysis)**: *"go over the current project skeleton (do not change anything) and tell me what you understand from this structure that i need to implement"*
 * **Prompt 2 (API Contract)**: *"Read README.md carefully and extract the full API contract."*
 * **Prompt 3 (Gap Analysis)**: *"Compare the current project and README API contract against the assignment requirements..."*
-* **Prompt 4 (Structure)**: *"Propose a clean Spring Boot package structure for this assignment."*
-* **Prompt 5 (Plan)**: *"Create an implementation plan for this project in phases..."*
-* **Prompt 6 (Test Plan)**: *"Create a test plan for the IssueFlow assignment..."*
-* **Prompt 7 (Ambiguities)**: *"Review the assignment requirements and identify ambiguous or risky areas."*
-* **Prompt 8 (Phase 6 — Tests)**: *"Implement Phase 6 — Tests: create test application.yaml, write auth, ticket, auto-assignment, auto-escalation, and attachment validation tests."*
-* **Prompt 9 (Phase 7 — Documentation)**: *"Implement Phase 7 — Documentation: finalize run.md with exact commands, prompts.md with all prompts used, and seed data.sql with example users."*
+* **Prompt 4 (Design & Architecture)**: *"Propose a clean Spring Boot package structure for this assignment. Discuss the architecture decisions, specifically monolithic vs. microservices, and outline the system's scalability and capacity limits."*
+* **Prompt 5 (Documentation Generation)**: *"Generate the project documentation files inside the 'docs' folder, including the API contract checklist, implementation decisions, rules, and system input restrictions."*
+* **Prompt 6 (Plan)**: *"Create an implementation plan for this project in phases..."*
+* **Prompt 7 (Test Plan & Ambiguities)**: *"Review the assignment requirements, identify ambiguous or risky areas, and create a comprehensive test plan."*
+
+### Prompt 8 - 14: implementing the project according to the plan phase by phase
+
+* **Prompt 15+ (Security & Stress Testing)**: *"Conduct additional testing for the project, analyzing and hardening the system against SQL injection, exploring DDoS mitigation strategies, and performing stress testing scenarios."*

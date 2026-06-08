@@ -27,12 +27,56 @@ The system provides the following APIs:
 ## Technical Aspects
 The system is built using Java 21 or Java 25 with Spring Boot 3 or Spring Boot 4, leveraging its robust framework for creating RESTful APIs. Data persistence is managed using PostgreSQL via Spring Data JPA (Hibernate).
 
+## Architecture
+The system is built as a **Monolith**. For a lightweight issue-tracking platform of this scope, a monolithic architecture is the most pragmatic and efficient choice. It avoids the unnecessary complexity, network latency, and deployment overhead associated with microservices. Because the domain model is highly relational (Tickets belong to Projects, Comments belong to Tickets), keeping the data in a single PostgreSQL database with a unified backend provides strong data consistency and faster development cycles.
+
+## Scalability
+**Current Capacity:** Out of the box, running on a single standard server instance, this Spring Boot & PostgreSQL setup can comfortably support **thousands of concurrent users**. The embedded Tomcat server efficiently handles concurrent requests via thread pooling, and HikariCP manages database connections.
+
+**Path to High Scale (Millions of Users):** 
+Because the application uses **JWT (JSON Web Tokens)** for authentication, the backend is entirely **stateless**. To support massive scale, we can implement the following:
+1. **Horizontal Scaling:** Deploy multiple instances of the Spring Boot application behind a Load Balancer (e.g., NGINX or AWS ALB). No sticky sessions are required.
+2. **Caching:** Introduce an in-memory data store like **Redis** to cache frequently accessed, read-heavy data (e.g., `GET /projects` or user profiles) to reduce database load.
+3. **Database Read Replicas:** Route read-only queries (like fetching ticket lists) to PostgreSQL read replicas, keeping the primary database dedicated to writes.
+4. **Asynchronous Processing:** Move heavy operations (like bulk CSV imports/exports or the auto-escalation scheduler) to a message broker like RabbitMQ or Kafka.
+
 ## Homework Task
 Candidates are expected to design and implement the above APIs, adhering to RESTful principles, including input validation, proper error handling, and relevant tests.
 
 ---
 
-## APIs
+## Jump Start
+For your convenience, `compose.yml` includes a PostgreSQL DB and the app is already configured to connect to it.
+
+Document your exact setup, build, and run steps in `run.md` (install dependencies, start the database, build the project, run the application, and run the tests).
+
+## Description
+
+[Spring Boot](https://spring.io/projects/spring-boot) Java starter project. Supports **Java 21** or **Java 25** with **Spring Boot 3** or **Spring Boot 4**.
+
+## Setup, Build, Run, and Test
+
+> **For full instructions, including OS-specific commands (Windows, macOS, Linux) for building, running, and testing the application, please refer to the `run.md` file.**
+
+## AI & Agents
+
+Full documentation in prompts.md file
+
+---
+
+## Project Documentation (`docs/`)
+
+> **Note:** This folder is included specifically for the assignment review process to demonstrate planning, AI usage, and architectural decisions. In a real-world production repository, these files would typically be managed in an internal wiki (like Confluence or Notion) rather than tracked in Git.
+
+The `docs/` directory contains important project documentation:
+- `api-contract-checklist.md`: A detailed checklist mapping API requirements to code, tracking implementation status and gaps.
+- `implementation-decisions.md`: An Architecture Decision Record (ADR) explaining the *why* behind key design choices (e.g., soft deletes, password handling).
+- `rules.md`: Internal guidelines and rules used during the AI-assisted development process.
+- `system_inputs_restrictions.md`: A list of all system inputs and their security validation constraints.
+
+---
+
+## API Reference
 
 ### Users APIs
 
@@ -152,51 +196,6 @@ Tickets and projects support **soft delete** only — deleted records are hidden
 | API Description             | Endpoint                              | Response Status | Response Body                                                                                             |
 |-----------------------------|---------------------------------------|-----------------|-----------------------------------------------------------------------------------------------------------|
 | Get project workload        | GET /projects/:projectId/workload     | 200 OK          | `[ { "userId": 1, "username": "jdoe", "openTicketCount": 3 }, { "userId": 2, "username": "asmith", "openTicketCount": 5 } ]` |
-
----
-
-## Jump Start
-For your convenience, `compose.yml` includes a PostgreSQL DB and the app is already configured to connect to it.
-
-Document your exact setup, build, and run steps in `run.md` (install dependencies, start the database, build the project, run the application, and run the tests).
-
-## Description
-
-[Spring Boot](https://spring.io/projects/spring-boot) Java starter project. Supports **Java 21** or **Java 25** with **Spring Boot 3** or **Spring Boot 4**.
-
-## Build
-
-```bash
-# using Maven wrapper
-$ ./mvnw clean package
-```
-
-## Running the app
-
-Full setup, build, and run instructions in run.md file
-
-## Test
-
-```bash
-# run all tests (Maven)
-$ ./mvnw test
-```
-
-## AI & Agents
-
-Full documentation in prompts.md file
-
----
-
-## Project Documentation (`docs/`)
-
-> **Note:** This folder is included specifically for the assignment review process to demonstrate planning, AI usage, and architectural decisions. In a real-world production repository, these files would typically be managed in an internal wiki (like Confluence or Notion) rather than tracked in Git.
-
-The `docs/` directory contains important project documentation:
-- `api-contract-checklist.md`: A detailed checklist mapping API requirements to code, tracking implementation status and gaps.
-- `implementation-decisions.md`: An Architecture Decision Record (ADR) explaining the *why* behind key design choices (e.g., soft deletes, password handling).
-- `rules.md`: Internal guidelines and rules used during the AI-assisted development process.
-- `system_inputs_restrictions.md`: A list of all system inputs and their security validation constraints.
 
 ---
 
