@@ -12,9 +12,9 @@
 
 | # | Method | Path | Request Body | Response Body | Auth Required? | Role Required? | Controller | Service | Status |
 |---|--------|------|-------------|--------------|----------------|----------------|------------|---------|--------|
-| A1 | POST | `/auth/login` | `{ username, password }` | `{ accessToken, tokenType, expiresIn }` | No | None | `AuthController` | `AuthService` | ❌ Missing |
-| A2 | POST | `/auth/logout` | — | — | Yes | Any | `AuthController` | `AuthService` | ❌ Missing |
-| A3 | GET | `/auth/me` | — | User object | Yes | Any | `AuthController` | `AuthService` | ❌ Missing |
+| A1 | POST | `/auth/login` | `{ username, password }` | `{ accessToken, tokenType, expiresIn }` | No | None | `AuthController` | `AuthService` | ✅ Complete |
+| A2 | POST | `/auth/logout` | — | — | Yes | Any | `AuthController` | `AuthService` | ✅ Complete |
+| A3 | GET | `/auth/me` | — | User object | Yes | Any | `AuthController` | `AuthService` | ✅ Complete |
 
 **Notes**:
 - `expiresIn` in the README example shows `3600` (seconds), but our config uses 86400000ms. Return `expiresIn` in **seconds** (`86400`).
@@ -26,12 +26,12 @@
 
 | # | Method | Path | Request Body | Response Body | Auth Required? | Role Required? | Controller | Service | Status |
 |---|--------|------|-------------|--------------|----------------|----------------|------------|---------|--------|
-| U1 | GET | `/users` | — | `[{ id, username, email, fullName, role }]` | Yes | Any | `UserController` | `UserService` | ❌ Missing |
-| U2 | GET | `/users/:userId` | — | `{ id, username, email, fullName, role }` | Yes | Any | `UserController` | `UserService` | ❌ Missing |
-| U3 | POST | `/users` | `{ username, email, fullName, role, password? }` | `{ id, username, email, fullName, role }` | No | None | `UserController` | `UserService` | ❌ Missing |
-| U4 | POST | `/users/update/:userId` | `{ fullName?, role? }` | — (200 OK) | Yes | Any | `UserController` | `UserService` | ❌ Missing |
-| U5 | DELETE | `/users/:userId` | — | — (200 OK) | Yes | Any | `UserController` | `UserService` | ❌ Missing |
-| U6 | GET | `/users/:userId/mentions` | — (query: `page`, `pageSize`) | `{ data: [...], total, page }` | Yes | Any | `UserController` | `CommentMentionService` | ❌ Missing |
+| U1 | GET | `/users` | — | `[{ id, username, email, fullName, role }]` | Yes | Any | `UserController` | `UserService` | ✅ Complete |
+| U2 | GET | `/users/:userId` | — | `{ id, username, email, fullName, role }` | Yes | Any | `UserController` | `UserService` | ✅ Complete |
+| U3 | POST | `/users` | `{ username, email, fullName, role, password? }` | `{ id, username, email, fullName, role }` | No | None | `UserController` | `UserService` | ✅ Complete |
+| U4 | POST | `/users/update/:userId` | `{ fullName?, role? }` | — (200 OK) | Yes | Any | `UserController` | `UserService` | ✅ Complete |
+| U5 | DELETE | `/users/:userId` | — | — (200 OK) | Yes | Any | `UserController` | `UserService` | ✅ Complete |
+| U6 | GET | `/users/:userId/mentions` | — (query: `page`, `pageSize`) | `{ data: [...], total, page }` | Yes | Any | `UserController` | `CommentMentionService` | ✅ Complete |
 
 **⚠️ CRITICAL MISMATCH — `email` field**:
 - README response body includes `email` in every User response: `{ id, username, email, fullName, role }`
@@ -50,14 +50,14 @@
 
 | # | Method | Path | Request Body | Response Body | Auth Required? | Role Required? | Controller | Service | Status |
 |---|--------|------|-------------|--------------|----------------|----------------|------------|---------|--------|
-| P1 | GET | `/projects` | — | `[{ id, name, description, ownerId }]` | Yes | Any | `ProjectController` | `ProjectService` | ❌ Missing |
-| P2 | GET | `/projects/:projectId` | — | `{ id, name, description, ownerId }` | Yes | Any | `ProjectController` | `ProjectService` | ❌ Missing |
-| P3 | POST | `/projects` | `{ name, description, ownerId }` | `{ id, name, description, ownerId }` | Yes | Any | `ProjectController` | `ProjectService` | ❌ Missing |
-| P4 | PATCH | `/projects/:projectId` | `{ name?, description? }` | — (200 OK) | Yes | Any | `ProjectController` | `ProjectService` | ❌ Missing |
-| P5 | DELETE | `/projects/:projectId` | — | — (200 OK) | Yes | Any | `ProjectController` | `ProjectService` | ❌ Missing |
-| P6 | GET | `/projects/deleted` | — | `[{ id, name, description, ownerId }]` | Yes | **ADMIN** | `ProjectController` | `ProjectService` | ❌ Missing |
-| P7 | POST | `/projects/:projectId/restore` | — | — (200 OK) | Yes | **ADMIN** | `ProjectController` | `ProjectService` | ❌ Missing |
-| P8 | GET | `/projects/:projectId/workload` | — | `[{ userId, username, openTicketCount }]` | Yes | Any | `ProjectController` | `ProjectService` | ❌ Missing |
+| P1 | GET | `/projects` | — | `[{ id, name, description, ownerId }]` | Yes | Any | `ProjectController` | `ProjectService` | ✅ Complete |
+| P2 | GET | `/projects/:projectId` | — | `{ id, name, description, ownerId }` | Yes | Any | `ProjectController` | `ProjectService` | ✅ Complete |
+| P3 | POST | `/projects` | `{ name, description, ownerId }` | `{ id, name, description, ownerId }` | Yes | Any | `ProjectController` | `ProjectService` | ✅ Complete |
+| P4 | PATCH | `/projects/:projectId` | `{ name?, description? }` | — (200 OK) | Yes | Any | `ProjectController` | `ProjectService` | ✅ Complete |
+| P5 | DELETE | `/projects/:projectId` | — | — (200 OK) | Yes | Any | `ProjectController` | `ProjectService` | ✅ Complete |
+| P6 | GET | `/projects/deleted` | — | `[{ id, name, description, ownerId }]` | Yes | **ADMIN** | `ProjectController` | `ProjectService` | ✅ Complete |
+| P7 | POST | `/projects/:projectId/restore` | — | — (200 OK) | Yes | **ADMIN** | `ProjectController` | `ProjectService` | ✅ Complete |
+| P8 | GET | `/projects/:projectId/workload` | — | `[{ userId, username, openTicketCount }]` | Yes | Any | `ProjectController` | `ProjectService` | ✅ Complete |
 
 **Notes**:
 - `GET /projects` (P1): must filter out soft-deleted projects (`deletedAt IS NULL`).
@@ -70,15 +70,15 @@
 
 | # | Method | Path | Request Body | Response Body | Auth Required? | Role Required? | Controller | Service | Status |
 |---|--------|------|-------------|--------------|----------------|----------------|------------|---------|--------|
-| T1 | GET | `/tickets?projectId=` | — | `[{ id, title, description, status, priority, type, projectId, assigneeId, dueDate, isOverdue }]` | Yes | Any | `TicketController` | `TicketService` | ❌ Missing |
-| T2 | GET | `/tickets/:ticketId` | — | `{ id, title, description, status, priority, type, projectId, assigneeId, dueDate, isOverdue }` | Yes | Any | `TicketController` | `TicketService` | ❌ Missing |
-| T3 | POST | `/tickets` | `{ title, description, status, priority, type, projectId, assigneeId?, dueDate? }` | Full ticket object | Yes | Any | `TicketController` | `TicketService` | ❌ Missing |
-| T4 | PATCH | `/tickets/:ticketId` | `{ title?, description?, status?, priority?, assigneeId?, dueDate? }` | — (200 OK) | Yes | Any | `TicketController` | `TicketService` | ❌ Missing |
-| T5 | DELETE | `/tickets/:ticketId` | — | — (200 OK) | Yes | Any | `TicketController` | `TicketService` | ❌ Missing |
-| T6 | GET | `/tickets/deleted?projectId=` | — | `[{ id, title, status, priority, type, projectId }]` | Yes | **ADMIN** | `TicketController` | `TicketService` | ❌ Missing |
-| T7 | POST | `/tickets/:ticketId/restore` | — | — (200 OK) | Yes | **ADMIN** | `TicketController` | `TicketService` | ❌ Missing |
-| T8 | GET | `/tickets/export?projectId=` | — | CSV file (Content-Type: `text/csv`) | Yes | Any | `TicketController` | `TicketService` | ❌ Missing |
-| T9 | POST | `/tickets/import` | `multipart/form-data`: `file` (CSV) + `projectId` (form field) | `{ created, failed, errors }` | Yes | Any | `TicketController` | `TicketService` | ❌ Missing |
+| T1 | GET | `/tickets?projectId=` | — | `[{ id, title, description, status, priority, type, projectId, assigneeId, dueDate, isOverdue }]` | Yes | Any | `TicketController` | `TicketService` | ✅ Complete |
+| T2 | GET | `/tickets/:ticketId` | — | `{ id, title, description, status, priority, type, projectId, assigneeId, dueDate, isOverdue }` | Yes | Any | `TicketController` | `TicketService` | ✅ Complete |
+| T3 | POST | `/tickets` | `{ title, description, status, priority, type, projectId, assigneeId?, dueDate? }` | Full ticket object | Yes | Any | `TicketController` | `TicketService` | ✅ Complete |
+| T4 | PATCH | `/tickets/:ticketId` | `{ title?, description?, status?, priority?, assigneeId?, dueDate? }` | — (200 OK) | Yes | Any | `TicketController` | `TicketService` | ✅ Complete |
+| T5 | DELETE | `/tickets/:ticketId` | — | — (200 OK) | Yes | Any | `TicketController` | `TicketService` | ✅ Complete |
+| T6 | GET | `/tickets/deleted?projectId=` | — | `[{ id, title, status, priority, type, projectId }]` | Yes | **ADMIN** | `TicketController` | `TicketService` | ✅ Complete |
+| T7 | POST | `/tickets/:ticketId/restore` | — | — (200 OK) | Yes | **ADMIN** | `TicketController` | `TicketService` | ✅ Complete |
+| T8 | GET | `/tickets/export?projectId=` | — | CSV file (Content-Type: `text/csv`) | Yes | Any | `TicketController` | `TicketService` | ✅ Complete |
+| T9 | POST | `/tickets/import` | `multipart/form-data`: `file` (CSV) + `projectId` (form field) | `{ created, failed, errors }` | Yes | Any | `TicketController` | `TicketService` | ✅ Complete |
 
 **Notes**:
 - T1, T2: both include `dueDate` and `isOverdue` in response — these are already in the `Ticket` entity ✅.
@@ -94,10 +94,10 @@
 
 | # | Method | Path | Request Body | Response Body | Auth Required? | Role Required? | Controller | Service | Status |
 |---|--------|------|-------------|--------------|----------------|----------------|------------|---------|--------|
-| C1 | GET | `/tickets/:ticketId/comments` | — | `[{ id, ticketId, authorId, content, mentionedUsers: [{id, username, fullName}] }]` | Yes | Any | `CommentController` | `CommentService` | ❌ Missing |
-| C2 | POST | `/tickets/:ticketId/comments` | `{ authorId, content }` | `{ id, ticketId, authorId, content, mentionedUsers: [...] }` | Yes | Any | `CommentController` | `CommentService` | ❌ Missing |
-| C3 | PATCH | `/tickets/:ticketId/comments/:commentId` | `{ content }` | — (200 OK) | Yes | Any | `CommentController` | `CommentService` | ❌ Missing |
-| C4 | DELETE | `/tickets/:ticketId/comments/:commentId` | — | — (200 OK) | Yes | Any | `CommentController` | `CommentService` | ❌ Missing |
+| C1 | GET | `/tickets/:ticketId/comments` | — | `[{ id, ticketId, authorId, content, mentionedUsers: [{id, username, fullName}] }]` | Yes | Any | `CommentController` | `CommentService` | ✅ Complete |
+| C2 | POST | `/tickets/:ticketId/comments` | `{ authorId, content }` | `{ id, ticketId, authorId, content, mentionedUsers: [...] }` | Yes | Any | `CommentController` | `CommentService` | ✅ Complete |
+| C3 | PATCH | `/tickets/:ticketId/comments/:commentId` | `{ content }` | — (200 OK) | Yes | Any | `CommentController` | `CommentService` | ✅ Complete |
+| C4 | DELETE | `/tickets/:ticketId/comments/:commentId` | — | — (200 OK) | Yes | Any | `CommentController` | `CommentService` | ✅ Complete |
 
 **Notes**:
 - Every comment response (C1, C2) must include `mentionedUsers` — requires join to `CommentMention` + `User`.
@@ -110,7 +110,7 @@
 
 | # | Method | Path | Request Body | Response Body | Auth Required? | Role Required? | Controller | Service | Status |
 |---|--------|------|-------------|--------------|----------------|----------------|------------|---------|--------|
-| AL1 | GET | `/audit-logs` | — (query: `entityType?`, `entityId?`, `action?`, `actor?`) | `[{ id, action, entityType, entityId, performedBy, actor, timestamp }]` | Yes | Any | `AuditLogController` | `AuditLogService` | ❌ Missing |
+| AL1 | GET | `/audit-logs` | — (query: `entityType?`, `entityId?`, `action?`, `actor?`) | `[{ id, action, entityType, entityId, performedBy, actor, timestamp }]` | Yes | Any | `AuditLogController` | `AuditLogService` | ✅ Complete |
 
 **⚠️ MISMATCH — `performedBy` type in README**:
 - README example shows: `"performedBy": 2` (a numeric user ID)
@@ -123,9 +123,9 @@
 
 | # | Method | Path | Request Body | Response Body | Auth Required? | Role Required? | Controller | Service | Status |
 |---|--------|------|-------------|--------------|----------------|----------------|------------|---------|--------|
-| D1 | POST | `/tickets/:ticketId/dependencies` | `{ blockedBy: 42 }` | — (200 OK) | Yes | Any | `DependencyController` | `DependencyService` | ❌ Missing |
-| D2 | GET | `/tickets/:ticketId/dependencies` | — | `[{ id, title, status }]` | Yes | Any | `DependencyController` | `DependencyService` | ❌ Missing |
-| D3 | DELETE | `/tickets/:ticketId/dependencies/:blockerId` | — | — (200 OK) | Yes | Any | `DependencyController` | `DependencyService` | ❌ Missing |
+| D1 | POST | `/tickets/:ticketId/dependencies` | `{ blockedBy: 42 }` | — (200 OK) | Yes | Any | `DependencyController` | `DependencyService` | ✅ Complete |
+| D2 | GET | `/tickets/:ticketId/dependencies` | — | `[{ id, title, status }]` | Yes | Any | `DependencyController` | `DependencyService` | ✅ Complete |
+| D3 | DELETE | `/tickets/:ticketId/dependencies/:blockerId` | — | — (200 OK) | Yes | Any | `DependencyController` | `DependencyService` | ✅ Complete |
 
 **Notes**:
 - D2 response is a list of **blocker ticket** objects (just `id, title, status`).
@@ -137,8 +137,8 @@
 
 | # | Method | Path | Request Body | Response Body | Auth Required? | Role Required? | Controller | Service | Status |
 |---|--------|------|-------------|--------------|----------------|----------------|------------|---------|--------|
-| AT1 | POST | `/tickets/:ticketId/attachments` | `multipart/form-data`: `file` | `{ id, ticketId, filename, contentType }` | Yes | Any | `AttachmentController` | `AttachmentService` | ❌ Missing |
-| AT2 | DELETE | `/tickets/:ticketId/attachments/:attachmentId` | — | — (200 OK) | Yes | Any | `AttachmentController` | `AttachmentService` | ❌ Missing |
+| AT1 | POST | `/tickets/:ticketId/attachments` | `multipart/form-data`: `file` | `{ id, ticketId, filename, contentType }` | Yes | Any | `AttachmentController` | `AttachmentService` | ✅ Complete |
+| AT2 | DELETE | `/tickets/:ticketId/attachments/:attachmentId` | — | — (200 OK) | Yes | Any | `AttachmentController` | `AttachmentService` | ✅ Complete |
 
 **Notes**:
 - AT1 response does NOT include the file binary — just metadata.
@@ -151,7 +151,7 @@
 
 | # | Method | Path | Request Body | Response Body | Auth Required? | Role Required? | Controller | Service | Status |
 |---|--------|------|-------------|--------------|----------------|----------------|------------|---------|--------|
-| M1 | GET | `/users/:userId/mentions` | — (query: `page?`, `pageSize?`) | `{ data: [comments with mentionedUsers], total, page }` | Yes | Any | `UserController` | `CommentMentionService` | ❌ Missing |
+| M1 | GET | `/users/:userId/mentions` | — (query: `page?`, `pageSize?`) | `{ data: [comments with mentionedUsers], total, page }` | Yes | Any | `UserController` | `CommentMentionService` | ✅ Complete |
 
 ---
 
@@ -159,7 +159,7 @@
 
 | # | Method | Path | Request Body | Response Body | Auth Required? | Role Required? | Controller | Service | Status |
 |---|--------|------|-------------|--------------|----------------|----------------|------------|---------|--------|
-| W1 | GET | `/projects/:projectId/workload` | — | `[{ userId, username, openTicketCount }]` | Yes | Any | `ProjectController` | `ProjectService` | ❌ Missing |
+| W1 | GET | `/projects/:projectId/workload` | — | `[{ userId, username, openTicketCount }]` | Yes | Any | `ProjectController` | `ProjectService` | ✅ Complete |
 
 ---
 

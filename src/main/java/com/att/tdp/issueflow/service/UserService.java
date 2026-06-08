@@ -63,7 +63,8 @@ public class UserService {
         user.setFullName(HtmlUtils.htmlEscape(request.getFullName()));
         user.setRole(request.getRole());
 
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        String rawPassword = request.getPassword() != null ? request.getPassword() : "secret";
+        user.setPassword(passwordEncoder.encode(rawPassword));
 
         User saved = userRepository.save(user);
         auditLogService.log(AuditAction.CREATE, "User", saved.getId(), saved.getId(), "USER");

@@ -29,7 +29,7 @@ public class CommentController {
 
     @GetMapping
     // Retrieves a paginated list of all comments for a specific ticket.
-    public ResponseEntity<PaginatedResponse<CommentResponse>> getComments(
+    public ResponseEntity<List<CommentResponse>> getComments(
             @PathVariable Long ticketId,
             @RequestParam(defaultValue = "1") @Min(1) int page,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {

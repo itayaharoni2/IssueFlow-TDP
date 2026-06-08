@@ -33,10 +33,10 @@ public class TicketController {
 
     private final TicketService ticketService;
 
-    @GetMapping("/project/{projectId}")
+    @GetMapping
     // Retrieves a list of all active tickets associated with a specific project.
-    public ResponseEntity<PaginatedResponse<TicketResponse>> getTicketsByProject(
-            @PathVariable Long projectId,
+    public ResponseEntity<List<TicketResponse>> getTicketsByProject(
+            @RequestParam Long projectId,
             @RequestParam(defaultValue = "1") @Min(1) int page,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
         return ResponseEntity.ok(ticketService.getActiveTickets(projectId, PageRequest.of(page - 1, size)));
@@ -46,7 +46,7 @@ public class TicketController {
     @PreAuthorize("hasRole('ADMIN')")
     // Retrieves a list of all soft-deleted tickets for a specific project. Requires ADMIN
     // privileges.
-    public ResponseEntity<PaginatedResponse<TicketResponse>> getDeletedTickets(
+    public ResponseEntity<List<TicketResponse>> getDeletedTickets(
             @RequestParam Long projectId,
             @RequestParam(defaultValue = "1") @Min(1) int page,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
@@ -85,7 +85,7 @@ public class TicketController {
 
     @PatchMapping("/{ticketId}")
     // Updates the properties of an existing ticket.
-    public ResponseEntity<Void> updateTicket(@PathVariable Long ticketId, @RequestBody UpdateTicketRequest request) {
+    public ResponseEntity<Void> updateTicket(@PathVariable Long ticketId, @Valid @RequestBody UpdateTicketRequest request) {
         ticketService.updateTicket(ticketId, request);
         return ResponseEntity.ok().build();
     }

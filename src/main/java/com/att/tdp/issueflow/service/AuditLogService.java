@@ -43,7 +43,7 @@ public class AuditLogService {
      * Retrieves and filters audit logs based on the provided parameters, mapping them to response DTOs.
      */
     @Transactional(readOnly = true)
-    public PaginatedResponse<com.att.tdp.issueflow.dto.audit.AuditLogResponse> getLogs(String entityType, Long entityId, AuditAction action, String actor, Pageable pageable) {
+    public List<com.att.tdp.issueflow.dto.audit.AuditLogResponse> getLogs(String entityType, Long entityId, AuditAction action, String actor, Pageable pageable) {
         Specification<AuditLog> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (entityType != null) {
@@ -62,6 +62,6 @@ public class AuditLogService {
         };
 
         Page<AuditLog> page = auditLogRepository.findAll(spec, pageable);
-        return new PaginatedResponse<>(page.map(com.att.tdp.issueflow.dto.audit.AuditLogResponse::new));
+        return page.map(com.att.tdp.issueflow.dto.audit.AuditLogResponse::new).getContent();
     }
 }

@@ -40,18 +40,18 @@ public class ProjectService {
     /**
      * Fetches a list of all current projects that have not been soft-deleted.
      */
-    public PaginatedResponse<ProjectResponse> getActiveProjects(Pageable pageable) {
+    public List<ProjectResponse> getActiveProjects(Pageable pageable) {
         Page<Project> page = projectRepository.findAllByDeletedAtIsNull(pageable);
-        return new PaginatedResponse<>(page.map(ProjectResponse::new));
+        return page.map(ProjectResponse::new).getContent();
     }
 
     @Transactional(readOnly = true)
     /**
      * Fetches a list of all projects that have been soft-deleted (archived).
      */
-    public PaginatedResponse<ProjectResponse> getDeletedProjects(Pageable pageable) {
+    public List<ProjectResponse> getDeletedProjects(Pageable pageable) {
         Page<Project> page = projectRepository.findAllByDeletedAtIsNotNull(pageable);
-        return new PaginatedResponse<>(page.map(ProjectResponse::new));
+        return page.map(ProjectResponse::new).getContent();
     }
 
     @Transactional(readOnly = true)

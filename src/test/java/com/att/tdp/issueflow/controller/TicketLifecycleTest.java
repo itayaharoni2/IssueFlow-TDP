@@ -105,11 +105,11 @@ class TicketLifecycleTest extends BaseIntegrationTest {
         createTicket(p1, admin, null);
         createTicket(p2, admin, null);
 
-        mockMvc.perform(get("/tickets/project/" + p1.getId())
+        mockMvc.perform(get("/tickets?projectId=" + p1.getId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].projectId", is(p1.getId().intValue())));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].projectId", is(p1.getId().intValue())));
     }
 
     @Test
@@ -242,9 +242,9 @@ class TicketLifecycleTest extends BaseIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound());
 
-        mockMvc.perform(get("/tickets/project/" + p.getId())
+        mockMvc.perform(get("/tickets?projectId=" + p.getId())
                         .header("Authorization", "Bearer " + token))
-                .andExpect(jsonPath("$.content", hasSize(0)));
+                .andExpect(jsonPath("$", hasSize(0)));
     }
 
     @Test
@@ -259,7 +259,7 @@ class TicketLifecycleTest extends BaseIntegrationTest {
         mockMvc.perform(get("/tickets/deleted?projectId=" + p.getId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)));
+                .andExpect(jsonPath("$", hasSize(1)));
     }
 
     @Test

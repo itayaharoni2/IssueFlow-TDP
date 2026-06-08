@@ -54,16 +54,16 @@ public class TicketService {
 
     @Transactional(readOnly = true)
     // Retrieves all active (non-deleted) tickets for a specific project.
-    public PaginatedResponse<TicketResponse> getActiveTickets(Long projectId, Pageable pageable) {
+    public List<TicketResponse> getActiveTickets(Long projectId, Pageable pageable) {
         Page<Ticket> page = ticketRepository.findAllByProjectIdAndDeletedAtIsNull(projectId, pageable);
-        return new PaginatedResponse<>(page.map(TicketResponse::new));
+        return page.map(TicketResponse::new).getContent();
     }
 
     @Transactional(readOnly = true)
     // Retrieves all soft-deleted tickets for a specific project.
-    public PaginatedResponse<TicketResponse> getDeletedTickets(Long projectId, Pageable pageable) {
+    public List<TicketResponse> getDeletedTickets(Long projectId, Pageable pageable) {
         Page<Ticket> page = ticketRepository.findAllByProjectIdAndDeletedAtIsNotNull(projectId, pageable);
-        return new PaginatedResponse<>(page.map(TicketResponse::new));
+        return page.map(TicketResponse::new).getContent();
     }
 
     @Transactional(readOnly = true)

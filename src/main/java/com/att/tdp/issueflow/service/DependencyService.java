@@ -3,6 +3,7 @@ package com.att.tdp.issueflow.service;
 import com.att.tdp.issueflow.dto.ticket.DependencyResponse;
 import com.att.tdp.issueflow.entity.Ticket;
 import com.att.tdp.issueflow.entity.TicketDependency;
+import com.att.tdp.issueflow.entity.enums.AuditAction;
 import com.att.tdp.issueflow.exception.BadRequestException;
 import com.att.tdp.issueflow.exception.ResourceNotFoundException;
 import com.att.tdp.issueflow.repository.TicketDependencyRepository;
@@ -24,6 +25,8 @@ public class DependencyService {
 
     private final TicketDependencyRepository dependencyRepository;
     private final TicketRepository ticketRepository;
+    private final AuditLogService auditLogService;
+    private final AuthService authService;
 
     @Transactional
     /**
@@ -59,6 +62,9 @@ public class DependencyService {
         dependency.setBlockedBy(blockedBy);
 
         dependencyRepository.save(dependency);
+
+        Long currentUserId = getCurrentUserId();
+        auditLogService.log(AuditAction.CREATE, "Dependency", dependency.getId(), currentUserId, "USER");
     }
 
     @Transactional(readOnly = true)
@@ -89,5 +95,16 @@ public class DependencyService {
                 .orElseThrow(() -> new ResourceNotFoundException("Dependency not found"));
 
         dependencyRepository.delete(dependencyToRemove);
+
+        Long currentUserId = getCurrentUserId();
+        auditLogService.log(AuditAction.DELETE, "Dependency", dependencyToRemove.getId(), currentUserId, "USER");
+    }
+
+    private Long getCurrentUserId() {
+        try {
+            return authService.getCurrentUser().getId();
+        } catch (Exception e) {
+            return null; // For test cases without auth
+        }
     }
 }

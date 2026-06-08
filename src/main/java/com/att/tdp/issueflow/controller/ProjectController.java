@@ -31,7 +31,7 @@ public class ProjectController {
 
     @GetMapping
     // Retrieves a list of all active projects in the system.
-    public ResponseEntity<PaginatedResponse<ProjectResponse>> getProjects(
+    public ResponseEntity<List<ProjectResponse>> getProjects(
             @RequestParam(defaultValue = "1") @Min(1) int page,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
         return ResponseEntity.ok(projectService.getActiveProjects(PageRequest.of(page - 1, size)));
@@ -40,7 +40,7 @@ public class ProjectController {
     @GetMapping("/deleted")
     @PreAuthorize("hasRole('ADMIN')")
     // Retrieves a list of all soft-deleted projects.
-    public ResponseEntity<PaginatedResponse<ProjectResponse>> getDeletedProjects(
+    public ResponseEntity<List<ProjectResponse>> getDeletedProjects(
             @RequestParam(defaultValue = "1") @Min(1) int page,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
         return ResponseEntity.ok(projectService.getDeletedProjects(PageRequest.of(page - 1, size)));
@@ -60,7 +60,7 @@ public class ProjectController {
 
     @PatchMapping("/{projectId}")
     // Updates the details of an existing project.
-    public ResponseEntity<Void> updateProject(@PathVariable Long projectId, @RequestBody UpdateProjectRequest request) {
+    public ResponseEntity<Void> updateProject(@PathVariable Long projectId, @Valid @RequestBody UpdateProjectRequest request) {
         projectService.updateProject(projectId, request);
         return ResponseEntity.ok().build();
     }

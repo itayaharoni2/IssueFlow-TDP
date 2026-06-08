@@ -100,8 +100,8 @@ class CommentControllerTest extends BaseIntegrationTest {
         mockMvc.perform(get("/tickets/" + ticket.getId() + "/comments")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].mentionedUsers", notNullValue()));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].mentionedUsers", notNullValue()));
     }
 
     @Test
@@ -147,7 +147,7 @@ class CommentControllerTest extends BaseIntegrationTest {
 
         mockMvc.perform(get("/tickets/" + ticket.getId() + "/comments")
                         .header("Authorization", "Bearer " + token))
-                .andExpect(jsonPath("$.content", hasSize(0)));
+                .andExpect(jsonPath("$", hasSize(0)));
     }
 
     // ─── Mention tests ────────────────────────────────────────────────────────
@@ -226,7 +226,7 @@ class CommentControllerTest extends BaseIntegrationTest {
         // Verify mentions are cleared
         mockMvc.perform(get("/tickets/" + ticket.getId() + "/comments")
                         .header("Authorization", "Bearer " + token))
-                .andExpect(jsonPath("$.content[0].mentionedUsers", is(empty())));
+                .andExpect(jsonPath("$[0].mentionedUsers", is(empty())));
     }
 
     @Test

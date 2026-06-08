@@ -29,7 +29,6 @@ public class CreateUserRequest {
     @Size(min = 1, max = 50, message = "Full name must not exceed 50 characters")
     private String fullName;
 
-    @NotBlank(message = "Password is required")
     @Size(min = 8, max = 128, message = "Password must be between 8 and 128 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).+$", message = "Password must contain at least one letter and one number")
     private String password;

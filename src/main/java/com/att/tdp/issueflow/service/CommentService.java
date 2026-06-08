@@ -50,19 +50,19 @@ public class CommentService {
     @Transactional(readOnly = true)
     // Fetches all comments associated with a specific ticket in chronological
     // order, including populated mention metadata.
-    public PaginatedResponse<CommentResponse> getCommentsByTicket(Long ticketId, Pageable pageable) {
+    public List<CommentResponse> getCommentsByTicket(Long ticketId, Pageable pageable) {
         // Validation: Check if ticket exists
         ticketRepository.findByIdAndDeletedAtIsNull(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
         Page<Comment> page = commentRepository.findAllByTicketIdOrderByCreatedAtAsc(ticketId, pageable);
-        return new PaginatedResponse<>(page.map(comment -> {
+        return page.map(comment -> {
             List<MentionedUserDto> mentions = commentMentionRepository.findByCommentId(comment.getId()).stream()
                     .map(cm -> new MentionedUserDto(cm.getUser().getId(), cm.getUser().getUsername(),
                             cm.getUser().getFullName()))
                     .collect(Collectors.toList());
             return new CommentResponse(comment, mentions);
-        }));
+        }).getContent();
     }
 
     @Transactional
